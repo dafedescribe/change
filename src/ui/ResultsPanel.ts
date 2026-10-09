@@ -149,13 +149,24 @@ export class ResultsPanel {
             : ''
         }
 
-        <!-- Share toast feedback -->
-        <div class="share-toast" data-share-toast style="display: none;"></div>
+        <!-- Viral social sharing bar -->
+        <div class="share-section">
+          <span class="share-section-title">BROADCAST YOUR CONDUCTOR RECORD:</span>
+          <div class="share-channels-grid">
+            <button type="button" class="social-share-btn share-whatsapp" data-share-whatsapp>
+              💬 WhatsApp Status
+            </button>
+            <button type="button" class="social-share-btn share-x" data-share-x>
+              𝕏 Post on X / Twitter
+            </button>
+            <button type="button" class="social-share-btn share-copy" data-share-copy>
+              📋 Copy / Native Share
+            </button>
+          </div>
+          <div class="share-toast" data-share-toast style="display: none;"></div>
+        </div>
 
         <div class="results-actions">
-          <button type="button" class="share-button" data-share-score>
-            📲 Share Conductor Record (WhatsApp / X)
-          </button>
           ${
             onMainMenu
               ? `
@@ -170,25 +181,47 @@ export class ResultsPanel {
       </section>
     `;
 
-    // Share button handler
-    const shareBtn = root.querySelector<HTMLButtonElement>('[data-share-score]');
     const shareToast = root.querySelector<HTMLElement>('[data-share-toast]');
 
     const shareText = [
       `🚎 CHANGE — Lagos Danfo Conductor Simulator`,
       `🏆 Rank: ${reconciliation.rank} ${'⭐'.repeat(reconciliation.stars)}`,
-      `💰 Score: ${reconciliation.score} PTS | Profit: ${formatNaira(reconciliation.finalProfit)}`,
+      `💰 Score: ${reconciliation.score} PTS | Net Profit: ${formatNaira(reconciliation.finalProfit)}`,
       `👥 Delivered: ${reconciliation.passengersDelivered}/${reconciliation.totalPassengers} Passengers`,
-      `💍 Marriages Performed: ${reconciliation.marriagesPerformed}`,
-      `🛣️ Route: Oshodi → Yaba → Ojuelegba → Ketu`,
-      `Can you survive the Oshodi rush? Beat my conductor score!`,
+      `💍 Marriages: ${reconciliation.marriagesPerformed}`,
+      `🛣️ Route: Oshodi → Yaba → Ojuelegba → Ketu (Zero Debt!)`,
+      `Can you survive the Oshodi rush? Beat my score!`,
     ].join('\n');
 
-    shareBtn?.addEventListener('click', async () => {
+    const showToast = (msg: string): void => {
+      if (shareToast) {
+        shareToast.textContent = msg;
+        shareToast.style.display = 'block';
+        setTimeout(() => {
+          shareToast.style.display = 'none';
+        }, 3500);
+      }
+    };
+
+    // 1. WhatsApp direct intent
+    root.querySelector('[data-share-whatsapp]')?.addEventListener('click', () => {
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+      window.open(waUrl, '_blank', 'noopener,noreferrer');
+    });
+
+    // 2. X (Twitter) direct intent
+    root.querySelector('[data-share-x]')?.addEventListener('click', () => {
+      const tweetText = `I scored ${reconciliation.score} PTS (${reconciliation.rank}) in CHANGE — Lagos Danfo Conductor Simulator! 🚎💨 Can you survive Oshodi rush?`;
+      const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&hashtags=ChangeGame,LagosDanfo,IndieGame`;
+      window.open(xUrl, '_blank', 'noopener,noreferrer');
+    });
+
+    // 3. Native Share / Clipboard Copy
+    root.querySelector('[data-share-copy]')?.addEventListener('click', async () => {
       if (typeof navigator !== 'undefined' && navigator.share) {
         try {
           await navigator.share({
-            title: 'CHANGE — Lagos Danfo Conductor Score',
+            title: 'CHANGE — Lagos Danfo Conductor Record',
             text: shareText,
           });
           return;
@@ -200,15 +233,9 @@ export class ResultsPanel {
       if (typeof navigator !== 'undefined' && navigator.clipboard) {
         try {
           await navigator.clipboard.writeText(shareText);
-          if (shareToast) {
-            shareToast.textContent = '✓ Copied score to clipboard! Ready to paste on WhatsApp / X!';
-            shareToast.style.display = 'block';
-            setTimeout(() => {
-              shareToast.style.display = 'none';
-            }, 3500);
-          }
+          showToast('✓ Copied conductor scorecard to clipboard! Ready to paste anywhere!');
         } catch {
-          // Ignore
+          showToast('Could not copy automatically. Take a screenshot!');
         }
       }
     });
