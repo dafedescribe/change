@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320">
+  <circle cx="120" cy="72" r="48" fill="#8e5b43"/><path d="M70 62q50-75 100 0v18H70z" fill="#e0b657"/>
+  <path d="M52 320V180q0-42 68-42t68 42v140z" fill="#cf6a4a"/><rect x="85" y="188" width="70" height="92" rx="9" fill="#182941"/>
+  <text x="120" y="234" text-anchor="middle" fill="#f5cf70" font-family="system-ui" font-size="15" font-weight="700">YOU</text>
+</svg>
