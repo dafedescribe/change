@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bg-blessing" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#14281e"/>
+      <stop offset="100%" stop-color="#050e09"/>
+    </radialGradient>
+    <linearGradient id="skin-blessing" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7a462d"/>
+      <stop offset="100%" stop-color="#4d2816"/>
+    </linearGradient>
+    <linearGradient id="dress-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="400" rx="24" fill="url(#bg-blessing)"/>
+  <circle cx="200" cy="180" r="140" fill="#10b981" opacity="0.08"/>
+
+  <!-- Shoulders / Smart Work Dress -->
+  <path d="M70 390 C90 305 130 270 200 270 C270 270 310 305 330 390 Z" fill="url(#dress-emerald)"/>
+  <!-- Shoulder bag strap -->
+  <path d="M125 390 L175 270" stroke="#78350f" stroke-width="14" fill="none" stroke-linecap="round"/>
+  <path d="M125 390 L175 270" stroke="#d97706" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Neck -->
+  <rect x="175" y="210" width="50" height="65" rx="8" fill="url(#skin-blessing)"/>
+  <path d="M170 268 Q200 290 230 268" stroke="#f1f5f9" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+  <!-- Pearl Earrings & Ears -->
+  <ellipse cx="145" cy="178" rx="13" ry="20" fill="#603520"/>
+  <ellipse cx="255" cy="178" rx="13" ry="20" fill="#603520"/>
+  <circle cx="142" cy="192" r="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+  <circle cx="258" cy="192" r="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+
+  <!-- Head -->
+  <ellipse cx="200" cy="172" rx="54" ry="64" fill="url(#skin-blessing)"/>
+
+  <!-- Elegant Sleek Bun / Coiled Braids -->
+  <path d="M142 165 C135 105 165 75 200 75 C235 75 265 105 258 165 C250 120 230 102 200 102 C170 102 150 120 142 165 Z" fill="#171216"/>
+  <!-- Top Bun -->
+  <circle cx="200" cy="70" r="32" fill="#171216"/>
+  <circle cx="200" cy="70" r="28" fill="#261d24"/>
+
+  <!-- Eyebrows (calm, poised) -->
+  <path d="M166 142 Q180 137 190 142" stroke="#1f140e" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <path d="M210 142 Q220 137 234 142" stroke="#1f140e" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+  <!-- Eyes with calm expression -->
+  <ellipse cx="178" cy="156" rx="9" ry="6" fill="#ffffff"/>
+  <circle cx="179" cy="156" r="4.5" fill="#2d180f"/>
+  <circle cx="177" cy="154" r="1.5" fill="#ffffff"/>
+
+  <ellipse cx="222" cy="156" rx="9" ry="6" fill="#ffffff"/>
+  <circle cx="221" cy="156" r="4.5" fill="#2d180f"/>
+  <circle cx="219" cy="154" r="1.5" fill="#ffffff"/>
+
+  <!-- Nose -->
+  <path d="M200 158 L196 178 Q200 184 206 182" stroke="#3e2012" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- Composed pleasant smile -->
+  <path d="M185 204 Q200 216 215 204" stroke="#991b1b" stroke-width="4.5" fill="#ffffff" stroke-linecap="round"/>
+
+  <!-- Character Nameplate Badge -->
+  <g transform="translate(20, 20)">
+    <rect width="115" height="28" rx="8" fill="#000000aa" stroke="#10b981" stroke-width="1.5"/>
+    <text x="57" y="19" text-anchor="middle" fill="#6ee7b7" font-family="system-ui, sans-serif" font-weight="800" font-size="14">BLESSING</text>
+  </g>
+</svg>

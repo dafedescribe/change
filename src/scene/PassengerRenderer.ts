@@ -62,13 +62,15 @@ export function renderPassenger(
   );
 
   const accentColor = passenger.appearance?.accent ?? passenger.accent;
+  const characterSprite =
+    passenger.appearance?.sprite ??
+    (assets.characters as Record<string, string>)[passenger.id] ??
+    assets.passengerDefault;
+
+  button.style.setProperty('--accent', accentColor);
 
   button.innerHTML = `
-    <img class="passenger-art" src="${passenger.appearance?.sprite ?? assets.passengerDefault}" alt="" aria-hidden="true" />
-    <span class="passenger-head" style="--accent: ${accentColor}">
-      <span class="character-prop prop-${passenger.id}"></span>
-    </span>
-    <span class="passenger-body" style="--accent: ${accentColor}"></span>
+    <img class="passenger-art" src="${characterSprite}" alt="${passenger.name}" aria-hidden="true" />
     <span class="passenger-card">
       <div class="passenger-header">
         <strong>${passenger.name}</strong>

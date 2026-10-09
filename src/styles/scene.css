@@ -12,11 +12,11 @@
 .bus-rail { position: absolute; top: 3%; width: 5px; height: 58%; background: #a7afae; box-shadow: 0 0 0 2px #33465b; }.rail-one { left: 39%; transform: rotate(5deg); }.rail-two { right: 39%; transform: rotate(-5deg); }
 .bus-ceiling-light { position: absolute; top: 4%; left: 43%; width: 14%; height: 12px; border-radius: 999px; background: #f6df9b; box-shadow: 0 0 32px 8px #f4c96c88; }
 .bus-floor { position: absolute; bottom: 0; left: 0; right: 0; height: 26%; background: linear-gradient(160deg, #26394e, #0c1625); clip-path: polygon(8% 20%, 92% 20%, 100% 100%, 0 100%); }
-.conductor-label { position: absolute; bottom: 25%; left: 5%; }.conductor-seat { position: absolute; z-index: 2; bottom: 11%; left: 5%; display: grid; place-items: center; width: 17%; aspect-ratio: 1 / 1.2; border-radius: 44% 44% 18% 18%; background: #cf6a4a; color: #1c2533; font-size: .7rem; font-weight: 900; box-shadow: 0 16px 0 #8d463b; }.conductor-seat img { width: 100%; height: 100%; object-fit: contain; }.conductor-seat span { position: absolute; bottom: 12%; }
+.conductor-label { position: absolute; bottom: 25%; left: 5%; }.conductor-seat { position: absolute; z-index: 2; bottom: 11%; left: 5%; display: grid; place-items: center; width: 17%; aspect-ratio: 1 / 1.2; border-radius: 44% 44% 18% 18%; background: #cf6a4a; color: #1c2533; font-size: .7rem; font-weight: 900; box-shadow: 0 16px 0 #8d463b; overflow: hidden; }.conductor-seat img { width: 100%; height: 100%; object-fit: cover; border-radius: 44% 44% 18% 18%; }.conductor-seat span { position: absolute; bottom: 8%; background: #000000bb; padding: 2px 8px; border-radius: 999px; color: #f5cf70; font-weight: 900; }
 .interior-poster { position: absolute; z-index: 2; top: 15%; left: 44%; width: 7%; min-width: 58px; transform: rotate(-4deg); box-shadow: 0 8px 18px #02071166; }
 
 .passenger-layer { position: absolute; z-index: 4; inset: 0; }
-.passenger { position: absolute; width: 16%; min-width: 115px; border: 0; background: transparent; color: #f8f2df; cursor: pointer; transition: transform .18s ease, filter .18s ease; }
+.passenger { position: absolute; width: 16%; min-width: 115px; border: 0; background: transparent; color: #f8f2df; cursor: pointer; transition: transform .18s ease, filter .18s ease; display: flex; flex-direction: column; align-items: center; }
 .passenger:hover, .passenger:focus-visible { z-index: 5; transform: translateY(-8px) scale(1.03); filter: brightness(1.15); outline: none; }
 .passenger.is-selected { z-index: 6; transform: translateY(-10px) scale(1.05); filter: drop-shadow(0 0 14px #f5cf70bb); }
 .passenger.is-held { filter: drop-shadow(0 0 10px #818cf8aa); }
@@ -31,10 +31,9 @@
 .passenger-folake { right: 19%; bottom: 16%; }
 .passenger-sade { right: 5%; bottom: 18%; }
 
-.passenger-art { position: absolute; inset: 0 14% 27%; width: 72%; height: 58%; object-fit: contain; opacity: .35; }
-.passenger-head, .passenger-body { position: relative; z-index: 1; display: block; width: 42%; aspect-ratio: 1; margin: 0 auto -7%; border-radius: 50%; background: #8e5b43; box-shadow: inset -8px -3px 0 #52382f; }
-.passenger-body { width: 72%; height: 95px; margin: auto; border-radius: 44% 44% 15% 15%; background: var(--accent); box-shadow: inset -12px -2px 0 #0002; }
-.passenger-card { position: relative; z-index: 2; display: block; padding: .55rem .7rem; margin-top: -.2rem; border: 1px solid #f8f2df22; border-radius: 9px; background: #081323dd; text-align: left; }
+.passenger-art { position: relative; z-index: 2; width: 86px; height: 86px; margin: 0 auto -6px; border-radius: 16px; object-fit: cover; display: block; border: 2px solid var(--accent, #f5cf70); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75); background: #091322; transition: transform 0.18s ease, border-color 0.18s ease; }
+.passenger:hover .passenger-art, .passenger.is-selected .passenger-art { border-color: #f5cf70; box-shadow: 0 10px 28px #f5cf7066; transform: translateY(-3px) scale(1.04); }
+.passenger-card { position: relative; z-index: 3; display: block; width: 100%; padding: .55rem .7rem; border: 1px solid #f8f2df22; border-radius: 9px; background: #081323ee; text-align: left; box-sizing: border-box; }
 .passenger-header { display: flex; justify-content: space-between; align-items: center; gap: 4px; }
 .passenger-badge { font-size: 0.62rem; font-weight: 800; padding: 2px 6px; border-radius: 999px; text-transform: uppercase; white-space: nowrap; }
 .status-waiting { background: #334155; color: #cbd5e1; }
@@ -45,22 +44,4 @@
 .passenger-card strong { display: block; font-size: 0.95rem; }
 .passenger-card small { display: block; margin-top: .15rem; color: #aab8c8; font-size: .7rem; }
 
-/* Authentic Character Props */
-.character-prop { position: absolute; pointer-events: none; }
-/* Sade: Nigerian Gele (headwrap) */
-.prop-sade { top: -14px; left: -10px; right: -10px; height: 26px; border-radius: 40% 40% 10% 10%; background: linear-gradient(135deg, #a855f7, #6b21a8); box-shadow: 0 -3px 0 #4c1d95, inset 0 2px 0 #d8b4fe; transform: rotate(-3deg); }
-/* Tunde: Over-ear Headphones */
-.prop-tunde { top: -6px; left: -6px; right: -6px; height: 16px; border-top: 4px solid #1e293b; border-radius: 50% 50% 0 0; }
-.prop-tunde::before, .prop-tunde::after { content: ''; position: absolute; top: 8px; width: 8px; height: 16px; border-radius: 4px; background: #0f172a; box-shadow: inset 0 0 0 1px #38bdf8; }
-.prop-tunde::before { left: -2px; }
-.prop-tunde::after { right: -2px; }
-/* Babatunde: Street Cap / Fila */
-.prop-babatunde { top: -10px; left: 0; right: 0; height: 16px; border-radius: 50% 50% 20% 20%; background: #eab308; box-shadow: inset 0 -3px 0 #a16207; }
-/* Amarachi: Smart Spectacles */
-.prop-amarachi { top: 10px; left: 6px; right: 6px; height: 8px; border-top: 2px solid #38bdf8; }
-.prop-amarachi::before, .prop-amarachi::after { content: ''; position: absolute; top: 0; width: 10px; height: 8px; border: 2px solid #38bdf8; border-radius: 3px; background: rgba(56, 189, 248, 0.2); }
-.prop-amarachi::before { left: 0; }
-.prop-amarachi::after { right: 0; }
-/* Folake: Pink Hair Beads */
-.prop-folake { top: -8px; left: -2px; right: -2px; height: 14px; border-radius: 50%; background: #f43f5e; box-shadow: -4px 4px 0 #fb7185, 4px 4px 0 #fb7185; }
 

@@ -2,6 +2,7 @@ import { scenarioSystem } from '../systems/ScenarioSystem';
 import type { JourneyScenario } from '../data/scenarios';
 import type { PersonalBest } from '../systems/PersistenceSystem';
 import { formatNaira } from '../utils/currency';
+import { assets } from '../data/assets';
 
 export class MainMenu {
   render(
@@ -22,10 +23,15 @@ export class MainMenu {
     root.innerHTML = `
       <section class="main-menu-shell" aria-label="CHANGE Main Menu">
         <div class="menu-hero">
-          <div class="menu-badge">LAGOS DANFO SIMULATOR</div>
-          <h1 class="game-logo">CHANGE!</h1>
-          <p class="menu-tagline">"Enter with your exact change, or face conductor trouble!"</p>
-          <div class="route-pill">ROUTE: Oshodi → Yaba → Ojuelegba → Ketu</div>
+          <div class="menu-banner-wrapper">
+            <img class="menu-banner-img" src="${assets.menuHeroBanner}" alt="Lagos Danfo Bus in Oshodi" />
+            <div class="menu-banner-overlay">
+              <div class="menu-badge">LAGOS DANFO SIMULATOR</div>
+              <h1 class="game-logo">CHANGE!</h1>
+              <p class="menu-tagline">"Enter with your exact change, or face conductor trouble!"</p>
+              <div class="route-pill">ROUTE: Oshodi → Yaba → Ojuelegba → Ketu</div>
+            </div>
+          </div>
         </div>
 
         <div class="menu-grid">
