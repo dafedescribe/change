@@ -30,6 +30,12 @@ export class ResultsPanel {
           </div>
 
           <div class="recon-card">
+            <span class="recon-label">Change Dispensed</span>
+            <strong>${formatNaira(reconciliation.changeDispensed)}</strong>
+            <small>${reconciliation.totalHeldChangeObligations > 0 ? `Unreturned: ${formatNaira(reconciliation.totalHeldChangeObligations)}` : 'All change settled'}</small>
+          </div>
+
+          <div class="recon-card">
             <span class="recon-label">Roadside Expenses</span>
             <strong class="stat-expense">-${formatNaira(reconciliation.totalRoadsideLeviesPaid)}</strong>
             <small>Owo Agbero & park levies</small>
@@ -40,7 +46,7 @@ export class ResultsPanel {
             <strong class="${reconciliation.totalPenalties > 0 ? 'stat-debt' : 'stat-paid'}">
               -${formatNaira(reconciliation.totalPenalties)}
             </strong>
-            <small>Debt & unpaid change fines</small>
+            <small>${reconciliation.totalOutstandingDebt > 0 ? `Uncollected debt: ${formatNaira(reconciliation.totalOutstandingDebt)}` : 'Zero uncollected debt'}</small>
           </div>
 
           <div class="recon-card recon-highlight">

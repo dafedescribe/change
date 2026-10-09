@@ -107,12 +107,12 @@ export function advanceJourney(
     isCompleted,
   };
 
-  // Process drop-offs for passengers reaching this stop
+  // Process drop-offs for passengers reaching this stop OR when journey reaches final stop
   const droppedOffIds = new Set<string>();
   const droppedOff: Passenger[] = [];
 
   const updatedPassengers = passengers.map((p) => {
-    if (p.destination === newStop && p.status !== 'dropped-off') {
+    if ((p.destination === newStop || isCompleted) && p.status !== 'dropped-off') {
       droppedOffIds.add(p.id);
       const dropped: Passenger = { ...p, status: 'dropped-off' };
       droppedOff.push(dropped);
@@ -121,11 +121,16 @@ export function advanceJourney(
     return p;
   });
 
-  // Process boarding passengers from pool
-  const boarded = getPassengersToBoard(boardingPool, newStop).map((p) => ({
-    ...p,
-    status: 'waiting' as const,
-  }));
+  // Process boarding passengers from pool (do not board at terminal, and avoid duplicate IDs)
+  const existingPassengerIds = new Set(updatedPassengers.map((p) => p.id));
+  const boarded = isCompleted
+    ? []
+    : boardingPool
+        .filter((p) => p.origin === newStop && !existingPassengerIds.has(p.id))
+        .map((p) => ({
+          ...p,
+          status: 'waiting' as const,
+        }));
 
   const combinedPassengers = [...updatedPassengers, ...boarded];
 

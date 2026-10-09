@@ -63,6 +63,17 @@ export function payRoadsideEvent(
     }
   }
 
+  // If still remaining, cannot pay with available denominations
+  if (remainingCost > 0) {
+    return {
+      event,
+      paid: false,
+      cost: event.cost,
+      updatedCash: cash,
+      message: `Cannot pay ${event.title}! Available notes cannot pay ₦${event.cost}. Commotion erupted!`,
+    };
+  }
+
   // Calculate actual change returned from roadside agent if overpaid
   let nextCash = dispenseChange(cash, notesToDispense);
   if (remainingCost < 0) {

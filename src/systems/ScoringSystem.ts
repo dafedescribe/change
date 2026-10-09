@@ -1,7 +1,7 @@
 import type { Passenger } from '../data/passengers';
 import type { Cash } from '../game/GameState';
 import { calculateTotalCash } from './CashSystem';
-import { getTotalCollectedFare } from './FareSystem';
+import { getTotalCollectedFare, getTotalOutstandingBalance } from './FareSystem';
 
 export type ConductorRank =
   | 'Agba Conductor (Legendary Master)'
@@ -15,6 +15,9 @@ export type FinalReconciliation = {
   netCashGain: number;
   totalFaresCollected: number;
   totalRoadsideLeviesPaid: number;
+  totalOutstandingDebt: number;
+  totalHeldChangeObligations: number;
+  changeDispensed: number;
   unpaidDebtPenalty: number;
   unreturnedChangePenalty: number;
   totalPenalties: number;
@@ -36,12 +39,17 @@ export function calculateFinalReconciliation(
   finalCash: Cash,
   allPassengers: Passenger[],
   roadsideLeviesTotal = 0,
-  marriagesCount = 0
+  marriagesCount = 0,
+  changeDispensed = 0
 ): FinalReconciliation {
   const startCashVal = calculateTotalCash(startingCash);
   const finalCashVal = calculateTotalCash(finalCash);
   const netGain = finalCashVal - startCashVal;
   const faresCollected = getTotalCollectedFare(allPassengers);
+  const totalOutstandingDebt = getTotalOutstandingBalance(allPassengers);
+  const totalHeldChangeObligations = allPassengers
+    .filter((p) => Boolean(p.changeHeld))
+    .reduce((sum, p) => sum + (p.heldChangeAmount ?? 0), 0);
 
   // Penalties:
   // 1. Unpaid debt for dropped-off passengers
@@ -123,6 +131,9 @@ export function calculateFinalReconciliation(
     netCashGain: netGain,
     totalFaresCollected: faresCollected,
     totalRoadsideLeviesPaid: roadsideLeviesTotal,
+    totalOutstandingDebt,
+    totalHeldChangeObligations,
+    changeDispensed,
     unpaidDebtPenalty,
     unreturnedChangePenalty,
     totalPenalties,

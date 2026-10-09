@@ -75,6 +75,17 @@ export function validateSelectedChange(
   const selectedTotal = selectedNotes.reduce((sum, n) => sum + n, 0);
   const difference = selectedTotal - requiredChange;
 
+  if (selectedNotes.some((n) => ![1000, 500, 200, 100].includes(n) || n <= 0)) {
+    return {
+      valid: false,
+      selectedTotal,
+      requiredChange,
+      difference,
+      status: 'insufficient_drawer',
+      message: 'Invalid banknote denomination selected',
+    };
+  }
+
   // Validate drawer availability
   if (!hasSufficientDenominations(availableCash, selectedNotes)) {
     return {

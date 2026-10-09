@@ -35,6 +35,7 @@ export function createInitialGameState(
     executedEventIds: [],
     activeEvent: undefined,
     marriagesCount: 0,
+    changeDispensed: 0,
     reconciliation: undefined,
     currentStop: initialJourney.currentStop,
     stopNumber: initialJourney.currentStopIndex + 1,

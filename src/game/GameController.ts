@@ -59,12 +59,99 @@ export class GameController {
     const passenger = this.state.passengers.find((p) => p.id === id);
     if (!passenger) return;
 
-    const fareDue = passenger.fare;
-    const tenderedNotes = customTenderedNotes ?? passenger.tenderedNotes ?? [fareDue];
-    const tenderedTotal = tenderedNotes.reduce((sum, n) => sum + n, 0);
-    const requiredChange = Math.max(0, tenderedTotal - fareDue);
+    if (passenger.status === 'dropped-off') {
+      this.state = {
+        ...this.state,
+        message: `${passenger.name} has already alighted and left the bus.`,
+      };
+      this.onChange?.(this.state);
+      return;
+    }
 
-    const initialValidation = validateSelectedChange(requiredChange, [], this.state.cash);
+    const fareDue = passenger.fare;
+    const previouslyPaid = passenger.paidAmount ?? 0;
+    const remainingDue = calculateOutstandingBalance(fareDue, previouslyPaid);
+
+    // If passenger is already fully paid and has no change on hold
+    if (passenger.paymentStatus === 'paid' && !passenger.changeHeld && remainingDue === 0) {
+      const activeTransaction: ActiveTransaction = {
+        passengerId: id,
+        fareDue,
+        tenderedNotes: [],
+        tenderedTotal: 0,
+        requiredChange: 0,
+        selectedChangeNotes: [],
+        selectedChangeTotal: 0,
+        status: 'completed',
+        validationMessage: `✓ ${passenger.name} has already paid the ₦${fareDue} fare.`,
+        paidAmount: previouslyPaid,
+        pendingPayment: [],
+        outstandingBalance: 0,
+        changeDue: 0,
+      };
+
+      this.state = {
+        ...this.state,
+        selectedPassengerId: id,
+        pendingPayment: [],
+        activeTransaction,
+        message: activeTransaction.validationMessage,
+      };
+      this.onChange?.(this.state);
+      return;
+    }
+
+    // If passenger has held change
+    if (passenger.changeHeld && (passenger.heldChangeAmount ?? 0) > 0) {
+      const heldAmount = passenger.heldChangeAmount ?? 0;
+      const initialValidation = validateSelectedChange(heldAmount, [], this.state.cash);
+      const activeTransaction: ActiveTransaction = {
+        passengerId: id,
+        fareDue,
+        tenderedNotes: [],
+        tenderedTotal: 0,
+        requiredChange: heldAmount,
+        selectedChangeNotes: [],
+        selectedChangeTotal: 0,
+        status: 'under',
+        validationMessage: `Change held: ₦${heldAmount} due to ${passenger.name}.`,
+        paidAmount: previouslyPaid,
+        pendingPayment: [],
+        outstandingBalance: 0,
+        changeDue: heldAmount,
+      };
+
+      this.state = {
+        ...this.state,
+        selectedPassengerId: id,
+        pendingPayment: [],
+        activeTransaction,
+        message: activeTransaction.validationMessage,
+      };
+      this.onChange?.(this.state);
+      return;
+    }
+
+    // Unpaid or partial
+    const tenderedNotes =
+      customTenderedNotes ?? passenger.tenderedNotes ?? [remainingDue > 0 ? remainingDue : fareDue];
+    const tenderedTotal = tenderedNotes.reduce((sum, n) => sum + n, 0);
+    const requiredChange = Math.max(0, tenderedTotal - remainingDue);
+    const isUnderpaid = tenderedTotal < remainingDue;
+
+    const initialValidation = isUnderpaid
+      ? {
+          valid: false,
+          selectedTotal: 0,
+          requiredChange,
+          difference: -requiredChange,
+          status: 'under' as const,
+          message:
+            remainingDue < fareDue
+              ? `Incomplete payment tendered: ₦${tenderedTotal} is below the ₦${remainingDue} remaining fare`
+              : `Incomplete payment tendered: ₦${tenderedTotal} is below the ₦${fareDue} fare`,
+        }
+      : validateSelectedChange(requiredChange, [], this.state.cash);
 
     const activeTransaction: ActiveTransaction = {
       passengerId: id,
@@ -74,11 +161,11 @@ export class GameController {
       requiredChange,
       selectedChangeNotes: [],
       selectedChangeTotal: 0,
-      status: requiredChange === 0 ? 'correct' : 'under',
+      status: isUnderpaid ? 'under' : requiredChange === 0 ? 'correct' : 'under',
       validationMessage: initialValidation.message,
-      paidAmount: passenger.paidAmount ?? 0,
+      paidAmount: previouslyPaid,
       pendingPayment: [],
-      outstandingBalance: calculateOutstandingBalance(fareDue, passenger.paidAmount ?? 0),
+      outstandingBalance: remainingDue,
       changeDue: requiredChange,
     };
 
@@ -106,23 +193,41 @@ export class GameController {
   acceptAmountPaid(tenderedNotes: number[]): void {
     const active = this.state.activeTransaction;
     if (!active) return;
+    const passenger = this.selectedPassenger;
+    if (!passenger || passenger.status === 'dropped-off') return;
 
+    const remainingDue = calculateOutstandingBalance(passenger.fare, passenger.paidAmount ?? 0);
     const tenderedTotal = tenderedNotes.reduce((sum, n) => sum + n, 0);
-    const requiredChange = Math.max(0, tenderedTotal - active.fareDue);
+    const requiredChange = Math.max(0, tenderedTotal - remainingDue);
+    const isUnderpaid = tenderedTotal < remainingDue;
 
-    const validation = validateSelectedChange(
-      requiredChange,
-      active.selectedChangeNotes,
-      this.state.cash
-    );
+    const validation = isUnderpaid
+      ? {
+          valid: false,
+          selectedTotal: active.selectedChangeTotal,
+          requiredChange,
+          difference: active.selectedChangeTotal - requiredChange,
+          status: 'under' as const,
+          message:
+            remainingDue < passenger.fare
+              ? `Incomplete payment tendered: ₦${tenderedTotal} is below the ₦${remainingDue} remaining fare`
+              : `Incomplete payment tendered: ₦${tenderedTotal} is below the ₦${passenger.fare} fare`,
+        }
+      : validateSelectedChange(
+          requiredChange,
+          active.selectedChangeNotes,
+          this.state.cash
+        );
 
     const updatedTransaction: ActiveTransaction = {
       ...active,
+      fareDue: passenger.fare,
+      outstandingBalance: remainingDue,
       tenderedNotes: [...tenderedNotes],
       tenderedTotal,
       requiredChange,
       changeDue: requiredChange,
-      status: validation.status === 'correct' ? 'correct' : validation.status,
+      status: isUnderpaid ? 'under' : validation.status === 'correct' ? 'correct' : validation.status,
       validationMessage: validation.message,
     };
 
@@ -261,6 +366,45 @@ export class GameController {
     const active = this.state.activeTransaction;
     if (!passenger || !active) return undefined;
 
+    if (passenger.status === 'dropped-off') {
+      const msg = `Cannot process transaction: ${passenger.name} has already alighted.`;
+      this.state = { ...this.state, message: msg };
+      this.onChange?.(this.state);
+      return undefined;
+    }
+
+    if (active.status === 'completed' && passenger.paymentStatus === 'paid' && !passenger.changeHeld) {
+      const msg = `Transaction for ${passenger.name} is already completed.`;
+      this.state = { ...this.state, message: msg };
+      this.onChange?.(this.state);
+      return undefined;
+    }
+
+    // If passenger change was held, delegate to settlePassengerChange
+    if (passenger.changeHeld && (passenger.heldChangeAmount ?? 0) > 0) {
+      const settleSuccess = this.settlePassengerChange(passenger.id, active.selectedChangeNotes);
+      if (!settleSuccess) return undefined;
+      const updatedPassenger = this.state.passengers.find((p) => p.id === passenger.id);
+      return {
+        accepted: true,
+        fare: passenger.fare,
+        amountPaid: 0,
+        requiredChange: passenger.heldChangeAmount ?? 0,
+        selectedChangeTotal: active.selectedChangeTotal,
+        changeValidation: {
+          valid: true,
+          selectedTotal: active.selectedChangeTotal,
+          requiredChange: passenger.heldChangeAmount ?? 0,
+          difference: 0,
+          status: 'correct',
+          message: 'Held change settled.',
+        },
+        updatedPassenger,
+        updatedCash: this.state.cash,
+        message: `Held change of ₦${passenger.heldChangeAmount} settled for ${passenger.name}.`,
+      };
+    }
+
     const result = executeConductorTransaction(
       passenger,
       active.tenderedNotes,
@@ -286,11 +430,14 @@ export class GameController {
     );
     const nextCash = result.updatedCash!;
     const progress = calculateJourneyProgress(this.state.journey, passengers);
+    const nextChangeDispensed = (this.state.changeDispensed ?? 0) + active.selectedChangeTotal;
 
     const completedTransaction: ActiveTransaction = {
       ...active,
       status: 'completed',
       validationMessage: result.message,
+      paidAmount: passenger.fare,
+      outstandingBalance: 0,
     };
 
     this.state = {
@@ -298,6 +445,7 @@ export class GameController {
       passengers,
       cash: nextCash,
       progress,
+      changeDispensed: nextChangeDispensed,
       activeTransaction: completedTransaction,
       pendingPayment: [],
       message: result.message,
@@ -314,14 +462,41 @@ export class GameController {
     const active = this.state.activeTransaction;
     if (!passenger || !active) return;
 
+    if (passenger.status === 'dropped-off') {
+      const msg = `Cannot hold change: ${passenger.name} has already alighted.`;
+      this.state = { ...this.state, message: msg };
+      this.onChange?.(this.state);
+      return;
+    }
+
+    if (active.status === 'completed' || (passenger.paymentStatus === 'paid' && !passenger.changeHeld)) {
+      const msg = `Payment for ${passenger.name} is already finalized.`;
+      this.state = { ...this.state, message: msg };
+      this.onChange?.(this.state);
+      return;
+    }
+
     const holdResult = holdPassengerChange(
       passenger,
       active.tenderedNotes,
       this.state.cash
     );
 
+    if (!holdResult.success) {
+      this.state = {
+        ...this.state,
+        message: holdResult.message,
+        activeTransaction: {
+          ...active,
+          validationMessage: holdResult.message,
+        },
+      };
+      this.onChange?.(this.state);
+      return;
+    }
+
     const passengers = this.state.passengers.map((p) =>
-      p.id === passenger.id ? holdResult.updatedPassenger : p
+      p.id === passenger.id ? holdResult.updatedPassenger! : p
     );
 
     const progress = calculateJourneyProgress(this.state.journey, passengers);
@@ -329,12 +504,16 @@ export class GameController {
     this.state = {
       ...this.state,
       passengers,
-      cash: holdResult.updatedCash,
+      cash: holdResult.updatedCash!,
       progress,
       activeTransaction: {
         ...active,
         status: 'completed',
         validationMessage: holdResult.message,
+        requiredChange: holdResult.requiredChange,
+        changeDue: holdResult.requiredChange,
+        paidAmount: passenger.fare,
+        outstandingBalance: 0,
       },
       message: holdResult.message,
     };
@@ -362,10 +541,31 @@ export class GameController {
       p.id === passengerId ? settleResult.updatedPassenger! : p
     );
 
+    const changeTotal = changeNotes.reduce((sum, n) => sum + n, 0);
+    const nextChangeDispensed = (this.state.changeDispensed ?? 0) + changeTotal;
+
+    let activeTransaction = this.state.activeTransaction;
+    if (activeTransaction && activeTransaction.passengerId === passengerId) {
+      activeTransaction = {
+        ...activeTransaction,
+        requiredChange: 0,
+        changeDue: 0,
+        selectedChangeNotes: [],
+        selectedChangeTotal: 0,
+        status: 'completed',
+        validationMessage: settleResult.message,
+      };
+    }
+
+    const progress = calculateJourneyProgress(this.state.journey, passengers);
+
     this.state = {
       ...this.state,
       passengers,
       cash: settleResult.updatedCash!,
+      progress,
+      changeDispensed: nextChangeDispensed,
+      activeTransaction,
       message: settleResult.message,
     };
     this.onChange?.(this.state);
@@ -385,7 +585,11 @@ export class GameController {
   marryPassengers(passengerAId: string, passengerBId: string, noteValue: number): boolean {
     const pA = this.state.passengers.find((p) => p.id === passengerAId);
     const pB = this.state.passengers.find((p) => p.id === passengerBId);
-    if (!pA || !pB) return false;
+    if (!pA || !pB) {
+      this.state = { ...this.state, message: 'One or both passengers not found on bus.' };
+      this.onChange?.(this.state);
+      return false;
+    }
 
     const marryResult = marryPassengersSystem(pA, pB, noteValue, this.state.cash);
     if (!marryResult.success) {
@@ -401,10 +605,27 @@ export class GameController {
       return p;
     });
 
+    let activeTransaction = this.state.activeTransaction;
+    if (activeTransaction && (activeTransaction.passengerId === pA.id || activeTransaction.passengerId === pB.id)) {
+      activeTransaction = {
+        ...activeTransaction,
+        requiredChange: 0,
+        changeDue: 0,
+        status: 'completed',
+        validationMessage: marryResult.message,
+      };
+    }
+
+    const progress = calculateJourneyProgress(this.state.journey, passengers);
+    const nextChangeDispensed = (this.state.changeDispensed ?? 0) + noteValue;
+
     this.state = {
       ...this.state,
       passengers,
       cash: marryResult.updatedCash!,
+      progress,
+      changeDispensed: nextChangeDispensed,
+      activeTransaction,
       marriagesCount: this.state.marriagesCount + 1,
       message: marryResult.message,
     };
@@ -423,9 +644,24 @@ export class GameController {
       return false;
     }
 
+    let activeTransaction = this.state.activeTransaction;
+    if (activeTransaction) {
+      const validation = validateSelectedChange(
+        activeTransaction.requiredChange,
+        activeTransaction.selectedChangeNotes,
+        breakResult.updatedCash!
+      );
+      activeTransaction = {
+        ...activeTransaction,
+        status: validation.status === 'correct' ? 'correct' : validation.status,
+        validationMessage: validation.message,
+      };
+    }
+
     this.state = {
       ...this.state,
       cash: breakResult.updatedCash!,
+      activeTransaction,
       message: breakResult.message,
     };
     this.onChange?.(this.state);
@@ -456,9 +692,9 @@ export class GameController {
     if (event) {
       const eventResult = payRoadsideEvent(event, currentCash);
       currentCash = eventResult.updatedCash;
+      executedEventIds.push(event.id);
       if (eventResult.paid) {
         roadsideExpenses += event.cost;
-        executedEventIds.push(event.id);
         eventNotice = ` ${eventResult.message}`;
       } else {
         eventNotice = ` ⚠ ${eventResult.message}`;
@@ -499,7 +735,8 @@ export class GameController {
         currentCash,
         advanceResult.updatedPassengers,
         roadsideExpenses,
-        this.state.marriagesCount
+        this.state.marriagesCount,
+        this.state.changeDispensed ?? 0
       );
       message += ` Route completed! Final Score: ${reconciliation.score} (${reconciliation.rank})`;
     }
@@ -533,12 +770,14 @@ export class GameController {
       this.state.cash,
       this.state.passengers,
       this.state.roadsideExpenses,
-      this.state.marriagesCount
+      this.state.marriagesCount,
+      this.state.changeDispensed ?? 0
     );
   }
 
   restartJourney(customPassengers?: Passenger[]): void {
     const list = customPassengers ?? defaultPassengers;
+    this.boardingPool = [...defaultBoardingPool];
     this.state = createInitialGameState(list);
     this.onChange?.(this.state);
   }
@@ -568,10 +807,15 @@ export class GameController {
 
     let activeTransaction = this.state.activeTransaction;
     if (activeTransaction) {
-      const remainingDue = activeTransaction.outstandingBalance;
+      const passenger = this.selectedPassenger;
+      const previouslyPaid = passenger?.paidAmount ?? 0;
+      const fare = passenger?.fare ?? activeTransaction.fareDue;
+      const remainingDue = calculateOutstandingBalance(fare, previouslyPaid);
       const changeDue = calculateChange(totalSelected, remainingDue);
       activeTransaction = {
         ...activeTransaction,
+        fareDue: fare,
+        outstandingBalance: remainingDue,
         tenderedNotes: [...pendingPayment],
         tenderedTotal: totalSelected,
         requiredChange: changeDue,
@@ -596,6 +840,20 @@ export class GameController {
   completePayment(): TransactionResult | undefined {
     const passenger = this.selectedPassenger;
     if (!passenger) return undefined;
+
+    if (passenger.status === 'dropped-off') {
+      const msg = `Cannot process transaction: ${passenger.name} has already alighted.`;
+      this.state = { ...this.state, message: msg };
+      this.onChange?.(this.state);
+      return { totalPaid: 0, change: 0, accepted: false, reason: msg };
+    }
+
+    if (passenger.paymentStatus === 'paid' && !passenger.changeHeld && passenger.outstandingBalance === 0) {
+      const msg = `${passenger.name} has already paid the fare in full.`;
+      this.state = { ...this.state, message: msg };
+      this.onChange?.(this.state);
+      return { totalPaid: 0, change: 0, accepted: false, reason: msg };
+    }
 
     const active = this.state.activeTransaction;
     if (active && active.selectedChangeNotes.length > 0) {
@@ -678,9 +936,27 @@ export class GameController {
     const passenger = this.selectedPassenger;
     if (!passenger) return undefined;
 
+    if (passenger.status === 'dropped-off') {
+      const msg = `Cannot process transaction: ${passenger.name} has already alighted.`;
+      this.state = { ...this.state, message: msg };
+      this.onChange?.(this.state);
+      return { totalPaid: 0, change: 0, accepted: false, reason: msg };
+    }
+
+    if (passenger.paymentStatus === 'paid' && passenger.outstandingBalance === 0) {
+      const msg = `${passenger.name} has already paid the fare in full.`;
+      this.state = { ...this.state, message: msg };
+      this.onChange?.(this.state);
+      return { totalPaid: 0, change: 0, accepted: false, reason: msg };
+    }
+
     const previouslyPaid = passenger.paidAmount ?? 0;
     const fare = getFareForPassenger(this.state.passengers, passenger.id);
-    const result = manageIncompleteTransaction(fare, this.state.pendingPayment, previouslyPaid);
+    const tenderedNotes = this.state.pendingPayment.length > 0
+      ? this.state.pendingPayment
+      : this.state.activeTransaction?.tenderedNotes ?? [];
+
+    const result = manageIncompleteTransaction(fare, tenderedNotes, previouslyPaid);
 
     if (!result.accepted) {
       this.state = {
@@ -708,13 +984,13 @@ export class GameController {
         : item
     );
 
-    const nextCash = receiveDenominations(this.state.cash, this.state.pendingPayment);
+    const nextCash = receiveDenominations(this.state.cash, tenderedNotes);
     const progress = calculateJourneyProgress(this.state.journey, passengers);
 
     const activeTransaction: ActiveTransaction = {
       passengerId: passenger.id,
       fareDue: fare,
-      tenderedNotes: [...this.state.pendingPayment],
+      tenderedNotes: [...tenderedNotes],
       tenderedTotal: totalPaidThisTime,
       requiredChange: 0,
       selectedChangeNotes: [],

@@ -54,7 +54,6 @@ export class TransactionPanel {
     const isChangeHeld = Boolean(passenger.changeHeld && (passenger.heldChangeAmount ?? 0) > 0);
     const isUnderpaidTender = tenderedTotal < fareDue;
     const isExactChange = selectedChangeTotal === requiredChange;
-    const canComplete = !isPaid && !isUnderpaidTender && isExactChange;
 
     let statusBadgeText = 'Incomplete';
     let statusClass = 'status-under';
@@ -94,6 +93,10 @@ export class TransactionPanel {
     const marriages = state.marriageCandidates ?? [];
     const hasThousand = (state.cash[1000] ?? 0) > 0;
     const hasFiveHundred = (state.cash[500] ?? 0) > 0;
+    const hasTwoHundred = (state.cash[200] ?? 0) > 0;
+    const canComplete = isChangeHeld
+      ? isExactChange && selectedChangeTotal > 0
+      : !isPaid && !isUnderpaidTender && isExactChange;
 
     root.innerHTML = `
       <section class="transaction-panel" aria-label="Fare collection transaction">
@@ -167,8 +170,8 @@ export class TransactionPanel {
                   (m) => `
                 <div class="marriage-item">
                   <span>${m.passengerA.name} (₦${m.changeA}) + ${m.passengerB.name} (₦${m.changeB}) = ₦${m.matchingNote} note</span>
-                  <button type="button" class="marry-button" data-marry-a="${m.passengerA.id}" data-marry-b="${m.passengerB.id}" data-marry-note="${m.matchingNote}">
-                    Marry Pair With ₦${m.matchingNote}
+                  <button type="button" class="marry-button" data-marry-a="${m.passengerA.id}" data-marry-b="${m.passengerB.id}" data-marry-note="${m.matchingNote}" ${!m.canExecute ? 'disabled' : ''}>
+                    ${m.canExecute ? `Marry Pair With ₦${m.matchingNote}` : `Need ₦${m.matchingNote} note to marry`}
                   </button>
                 </div>
               `
@@ -190,7 +193,7 @@ export class TransactionPanel {
 
           <!-- Roadside Break Note Controls -->
           ${
-            !isPaid && (hasThousand || hasFiveHundred) && onBreakNote
+            !isPaid && (hasThousand || hasFiveHundred || hasTwoHundred) && onBreakNote
               ? `
             <div class="break-note-box">
               <span class="break-label">ROADSIDE VENDOR · BREAK NOTE:</span>
@@ -210,6 +213,13 @@ export class TransactionPanel {
                 `
                     : ''
                 }
+                ${
+                  hasTwoHundred
+                    ? `
+                  <button type="button" class="break-chip" data-break-200>Break ₦200 (2x ₦100)</button>
+                `
+                    : ''
+                }
               </div>
             </div>
           `
@@ -224,7 +234,9 @@ export class TransactionPanel {
               ${!canComplete ? 'disabled' : ''}
             >
               ${
-                isPaid
+                isChangeHeld
+                  ? `Settle Held Change (₦${selectedChangeTotal})`
+                  : isPaid
                   ? 'Transaction Completed'
                   : requiredChange === 0
                   ? `Collect Exact Fare (${formatNaira(fareDue)})`
@@ -282,6 +294,9 @@ export class TransactionPanel {
       });
       root.querySelector<HTMLButtonElement>('[data-break-500]')?.addEventListener('click', () => {
         onBreakNote(500, [200, 200, 100]);
+      });
+      root.querySelector<HTMLButtonElement>('[data-break-200]')?.addEventListener('click', () => {
+        onBreakNote(200, [100, 100]);
       });
     }
 

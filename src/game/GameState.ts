@@ -42,6 +42,7 @@ export type GameState = {
   executedEventIds: string[];
   activeEvent?: RoadsideEvent;
   marriagesCount: number;
+  changeDispensed?: number;
   reconciliation?: FinalReconciliation;
   // Backward compatibility fields
   currentStop: string;

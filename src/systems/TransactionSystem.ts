@@ -230,10 +230,39 @@ export function executeConductorTransaction(
   selectedChangeNotes: number[],
   cash: Cash
 ): ConductorTransactionResult {
-  const amountPaid = tenderedNotes.reduce((sum, n) => sum + n, 0);
   const fare = passenger.fare;
+  const previouslyPaid = passenger.paidAmount ?? 0;
+  const remainingDue = calculateOutstandingBalance(fare, previouslyPaid);
 
-  if (amountPaid < fare) {
+  if (passenger.status === 'dropped-off') {
+    const validation = validateSelectedChange(0, [], cash);
+    return {
+      accepted: false,
+      fare,
+      amountPaid: 0,
+      requiredChange: 0,
+      selectedChangeTotal: 0,
+      changeValidation: validation,
+      message: `Cannot process transaction: ${passenger.name} has already alighted.`,
+    };
+  }
+
+  if (passenger.paymentStatus === 'paid' && !passenger.changeHeld && passenger.outstandingBalance === 0) {
+    const validation = validateSelectedChange(0, [], cash);
+    return {
+      accepted: false,
+      fare,
+      amountPaid: 0,
+      requiredChange: 0,
+      selectedChangeTotal: 0,
+      changeValidation: validation,
+      message: `${passenger.name} has already paid the ₦${fare} fare in full.`,
+    };
+  }
+
+  const amountPaid = tenderedNotes.reduce((sum, n) => sum + n, 0);
+
+  if (amountPaid < remainingDue) {
     const validation = validateSelectedChange(0, [], cash);
     return {
       accepted: false,
@@ -242,11 +271,14 @@ export function executeConductorTransaction(
       requiredChange: 0,
       selectedChangeTotal: 0,
       changeValidation: validation,
-      message: `Incomplete payment tendered: ₦${amountPaid} is below the ₦${fare} fare`,
+      message:
+        remainingDue < fare
+          ? `Incomplete payment tendered: ₦${amountPaid} is below the ₦${remainingDue} remaining fare`
+          : `Incomplete payment tendered: ₦${amountPaid} is below the ₦${fare} fare`,
     };
   }
 
-  const requiredChange = amountPaid - fare;
+  const requiredChange = amountPaid - remainingDue;
   const selectedChangeTotal = selectedChangeNotes.reduce((sum, n) => sum + n, 0);
   const validation = validateSelectedChange(requiredChange, selectedChangeNotes, cash);
 
@@ -270,6 +302,8 @@ export function executeConductorTransaction(
     outstandingBalance: 0,
     paymentStatus: 'paid',
     status: 'paid',
+    changeHeld: false,
+    heldChangeAmount: 0,
   };
 
   const message =
