@@ -20,10 +20,10 @@ export const assets = {
     tunde: '/assets/characters/tunde.jpg',
     babatunde: '/assets/characters/babatunde.jpg',
     amarachi: '/assets/characters/amarachi.jpg',
-    folake: '/assets/characters/folake.svg',
-    chidi: '/assets/characters/chidi.svg',
-    blessing: '/assets/characters/blessing.svg',
-    emeka: '/assets/characters/emeka.svg',
+    folake: '/assets/characters/folake.jpg',
+    chidi: '/assets/characters/chidi.jpg',
+    blessing: '/assets/characters/blessing.jpg',
+    emeka: '/assets/characters/emeka.jpg',
   },
 } as const;
 

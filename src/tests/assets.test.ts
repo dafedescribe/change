@@ -12,14 +12,14 @@ describe('asset manifest', () => {
     expect(assets.naira500).toBe('/assets/placeholders/note-500.svg');
     expect(assets.naira1000).toBe('/assets/placeholders/note-1000.svg');
 
-    // Individual character portraits
+    // Individual character portraits - all uniform JPG
     expect(assets.characters.sade).toBe('/assets/characters/sade.jpg');
     expect(assets.characters.tunde).toBe('/assets/characters/tunde.jpg');
     expect(assets.characters.babatunde).toBe('/assets/characters/babatunde.jpg');
     expect(assets.characters.amarachi).toBe('/assets/characters/amarachi.jpg');
-    expect(assets.characters.folake).toBe('/assets/characters/folake.svg');
-    expect(assets.characters.chidi).toBe('/assets/characters/chidi.svg');
-    expect(assets.characters.blessing).toBe('/assets/characters/blessing.svg');
-    expect(assets.characters.emeka).toBe('/assets/characters/emeka.svg');
+    expect(assets.characters.folake).toBe('/assets/characters/folake.jpg');
+    expect(assets.characters.chidi).toBe('/assets/characters/chidi.jpg');
+    expect(assets.characters.blessing).toBe('/assets/characters/blessing.jpg');
+    expect(assets.characters.emeka).toBe('/assets/characters/emeka.jpg');
   });
 });

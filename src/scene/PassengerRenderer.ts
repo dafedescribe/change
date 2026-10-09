@@ -70,7 +70,7 @@ export function renderPassenger(
   button.style.setProperty('--accent', accentColor);
 
   button.innerHTML = `
-    <img class="passenger-art" src="${characterSprite}" alt="${passenger.name}" aria-hidden="true" />
+    <img class="passenger-art" src="${characterSprite}" alt="${passenger.name}" onerror="this.onerror=null;this.src='${assets.passengerDefault}';" aria-hidden="true" />
     <span class="passenger-card">
       <div class="passenger-header">
         <strong>${passenger.name}</strong>
