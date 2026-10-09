@@ -72,7 +72,7 @@ npm test -- --run
 npm run build
 ```
 
-The test suite contains **81 passing tests across 12 test files**, verifying the entire game architecture, transaction integrity, journey progression, danfo mechanics, roadside events, and end-of-route reconciliation without requiring DOM or browser rendering:
+The test suite contains **93 passing tests across 15 test files**, verifying the entire game architecture, transaction integrity, journey progression, danfo mechanics, roadside events, scenario generators, audio safety, persistence, and end-of-route reconciliation without requiring DOM or browser rendering:
 
 - `src/tests/transaction_integrity.test.ts` (9 tests) — exact fare, overpayments, underpayments, cumulative partial payments, partial-to-full with change, drawer insufficiency, invalid denominations, duplicate execution prevention, alighted passenger protection.
 - `src/tests/danfo_mechanics.test.ts` (15 tests) — comprehensive testing of Hold, Marry, and Break actions including failure modes, invalid breakdown rejection, denomination availability, and alighted passenger checks.
@@ -85,6 +85,9 @@ The test suite contains **81 passing tests across 12 test files**, verifying the
 - `src/tests/transaction.test.ts` (5 tests) — payment validation.
 - `src/tests/fare.test.ts` (5 tests) — fare lookups and balance calculations.
 - `src/tests/gamestate.test.ts` (2 tests) — initial state factory validation.
+- `src/tests/persistence.test.ts` (4 tests) — personal best tracking, high score records, career accumulation, and settings.
+- `src/tests/scenarios.test.ts` (5 tests) — predefined scenario presets, starting cash validation, and deterministic seed generation.
+- `src/tests/audio.test.ts` (3 tests) — audio initialization, sound toggling, and headless environment safety.
 - `src/tests/assets.test.ts` (1 test) — asset manifest structure.
 
 ## Code map
@@ -92,8 +95,8 @@ The test suite contains **81 passing tests across 12 test files**, verifying the
 | Area | Responsibility |
 | --- | --- |
 | `src/game/GameState.ts` | State types, cash drawer, active transaction, and journey progress models. |
-| `src/game/Game.ts` | Factory for initializing fresh game state with changeDispensed tracking. |
-| `src/game/GameController.ts` | Orchestrates player actions, pure systems, event deduplication, and triggers re-renders. |
+| `src/game/Game.ts` | Factory for initializing game state with scenario-specific starting cash and passenger rosters. |
+| `src/game/GameController.ts` | Orchestrates player actions, pure systems, event deduplication, scenario restarts, and triggers re-renders. |
 | `src/systems/FareSystem.ts` | Fare lookup, outstanding balances, and total revenue tracking. |
 | `src/systems/CashSystem.ts` | Change math, note counts, drawer sufficiency, and denomination validation. |
 | `src/systems/TransactionSystem.ts` | Payment validation, partial payment/debt management, balance updates, and transaction integrity. |
@@ -101,10 +104,13 @@ The test suite contains **81 passing tests across 12 test files**, verifying the
 | `src/systems/RoadsideEventSystem.ts` | Stop events including Owo Agbero and bridge levies with denomination-safe deductions. |
 | `src/systems/ScoringSystem.ts` | Full financial reconciliation (change dispensed, debt, unsettled obligations, penalties, conductor rank). |
 | `src/systems/JourneySystem.ts` | Route advancement, terminal stop drop-offs, boarding deduplication, and journey completion. |
-| `src/data/` | Route stops, fare schedules, passenger roster, boarding pool, and asset IDs. |
-| `src/scene/` | Bus interior, passenger DOM rendering, badges, and layout. |
-| `src/ui/` | HUD, cash tray, transaction panel, notification banners, and results modal. |
-| `src/tests/` | 100% DOM-free Vitest coverage for all core systems and controller behavior (81 tests). |
+| `src/systems/PersistenceSystem.ts` | Local storage service for career records, high scores, stars, and audio settings with in-memory fallback. |
+| `src/systems/ScenarioSystem.ts` | Scenario catalog, difficulty presets, and deterministic procedural scenario generation from seeds. |
+| `src/systems/AudioSystem.ts` | Web Audio API synthesizer for retro-arcade sound effects (cash, chime, hold, marry, break, horn, fanfare). |
+| `src/data/` | Route stops, fare schedules, passenger roster, boarding pool, scenario presets, and asset IDs. |
+| `src/scene/` | Bus interior, passenger DOM rendering, badges, window billboard ad slot, and layout. |
+| `src/ui/` | Main menu, HUD, transaction panel, cash tray, pause modal, how-to-play guide, notifications, and results modal. |
+| `src/tests/` | 100% DOM-free Vitest coverage across all core systems, mechanics, and controller behavior (93 tests). |
 
 ## Deliverable verification & Invariants
 

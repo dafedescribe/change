@@ -12,7 +12,9 @@ export function sceneLayout(): string {
       </div>
       <div class="bus-scene" data-scene="bus-interior">
         <img class="bus-interior-art" src="${assets.busInterior}" alt="" aria-hidden="true" />
-        <div class="bus-window window-left"></div>
+        <div class="bus-window window-left">
+          <img class="window-billboard" src="${assets.roadsideBillboard}" alt="Roadside Advertisement" aria-hidden="true" />
+        </div>
         <div class="bus-window window-right"></div>
         <div class="bus-rail rail-one"></div>
         <div class="bus-rail rail-two"></div>

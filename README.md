@@ -14,12 +14,20 @@ CHANGE is a small danfo-conductor game prototype. The MVP starts with one bus in
 - **Route Progression**: Progress from Oshodi through Yaba and Ojuelegba to Ketu, handling drop-offs and passenger boarding.
 - **Reconciliation & Scoring**: Review final cash reconciliation (revenue, change dispensed, roadside expenses, uncollected debts, and rank).
 
+- **Main Menu & Shift Selector**: Pick from balanced scenarios (Morning Commute, Midday Change Squeeze, Market Day Combo, Late Night Express) or run seeded shifts.
+- **Career & Personal Best**: Automatic local persistence tracking high score, star rating, best rank, and total journeys completed.
+- **How-to-Play Guide**: Interactive 6-step conductor orientation manual accessible from menu and pause screens.
+- **Pause & Settings**: In-game conductor break modal with resume, sound on/off toggle, shift restart, and exit to menu.
+- **Audio Synthesis**: Zero-dependency Web Audio API sound effects for cash tenders, change chimes, hold deferrals, marry triads, break splits, bus horns, and victory fanfares.
+- **In-World Ad Placements**: Authentic roadside billboard visible through the bus windows and in-bus safety/commercial poster.
+
 ## Current scope
 
 - **Route**: Oshodi → Yaba → Ojuelegba → Ketu with intermediate boarding and terminal drop-offs.
 - **Mechanics**: 100% pure domain implementations of Fare, Cash, Transaction, Hold, Marry, Break, Journey, Roadside Events, and Scoring systems.
-- **UI & Scene**: Responsive danfo bus interior layout, HUD stats, 8-step transaction panel with drawer counters, notifications, and end-of-route results modal.
-- **Test Suite**: 81 tests across 12 test files with 100% DOM-free domain rule validation.
+- **Replayability & Persistence**: Predefined scenario catalog, deterministic procedural seed generator, and career high score persistence.
+- **UI & Presentation**: Main menu, bus interior with animated badges and window billboard, HUD quick controls, transaction panel, pause modal, how-to-play manual, and final reconciliation modal.
+- **Test Suite**: 93 tests across 15 test files with 100% DOM-free domain rule validation.
 
 ## Development
 

@@ -1,19 +1,44 @@
 import type { FinalReconciliation } from '../systems/ScoringSystem';
+import type { PersonalBest } from '../systems/PersistenceSystem';
 import { formatNaira } from '../utils/currency';
 
 export class ResultsPanel {
-  render(root: HTMLElement, reconciliation: FinalReconciliation, onRestart: () => void): void {
+  render(
+    root: HTMLElement,
+    reconciliation: FinalReconciliation,
+    onRestart: () => void,
+    onMainMenu?: () => void,
+    pbInfo?: { personalBest: PersonalBest; isNewHighScore: boolean }
+  ): void {
     const starIcons = '⭐'.repeat(reconciliation.stars);
 
     root.innerHTML = `
       <section class="results-panel" aria-label="Journey Results and Reconciliation">
         <div class="results-header">
+          ${
+            pbInfo?.isNewHighScore
+              ? `
+            <div class="new-record-banner">
+              🎉 NEW CAREER HIGH SCORE! 🎉
+            </div>
+          `
+              : ''
+          }
           <div class="score-badge">
             <span class="stars">${starIcons}</span>
             <span class="score-points">${reconciliation.score} PTS</span>
           </div>
           <p class="eyebrow">FINAL DANFO CONDUCTOR RECONCILIATION</p>
           <h2>${reconciliation.rank}</h2>
+          ${
+            pbInfo
+              ? `
+            <p class="pb-summary">
+              All-Time Record: <strong>${pbInfo.personalBest.highScore} PTS</strong> (${pbInfo.personalBest.bestRank}) • Shifts: ${pbInfo.personalBest.journeysCompleted}
+            </p>
+          `
+              : ''
+          }
         </div>
 
         <div class="reconciliation-grid">
@@ -78,7 +103,16 @@ export class ResultsPanel {
         }
 
         <div class="results-actions">
-          <button type="button" class="restart-button" data-restart>Drive Route Again (New Run)</button>
+          ${
+            onMainMenu
+              ? `
+            <button type="button" class="aux-button" data-results-menu>
+              ⌂ Main Menu
+            </button>
+          `
+              : ''
+          }
+          <button type="button" class="restart-button" data-restart>Drive Route Again (New Shift)</button>
         </div>
       </section>
     `;
@@ -86,5 +120,11 @@ export class ResultsPanel {
     root
       .querySelector<HTMLButtonElement>('[data-restart]')
       ?.addEventListener('click', onRestart);
+
+    if (onMainMenu) {
+      root
+        .querySelector<HTMLButtonElement>('[data-results-menu]')
+        ?.addEventListener('click', onMainMenu);
+    }
   }
 }

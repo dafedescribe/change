@@ -1,15 +1,17 @@
 import { journey as defaultJourneyData, DEFAULT_STOPS } from '../data/journey';
 import type { Passenger } from '../data/passengers';
-import type { GameState } from './GameState';
+import type { GameState, Cash } from './GameState';
 import { startingCash } from './GameState';
 import { createJourney, calculateJourneyProgress } from '../systems/JourneySystem';
 
 export function createInitialGameState(
   passengerList: Passenger[],
-  customStops?: string[]
+  customStops?: string[],
+  customStartingCash?: Cash
 ): GameState {
   const stops = customStops ?? [...DEFAULT_STOPS];
   const initialJourney = createJourney(stops, defaultJourneyData.route);
+  const initialCash = customStartingCash ? { ...customStartingCash } : { ...startingCash };
   const clonedPassengers: Passenger[] = passengerList.map((p) => ({
     ...p,
     paidAmount: p.paidAmount ?? 0,
@@ -28,7 +30,7 @@ export function createInitialGameState(
   return {
     journey: initialJourney,
     passengers: clonedPassengers,
-    cash: { ...startingCash },
+    cash: { ...initialCash },
     progress,
     activeTransaction: undefined,
     roadsideExpenses: 0,

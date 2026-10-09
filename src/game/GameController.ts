@@ -40,15 +40,18 @@ export class GameController {
   private state: GameState;
   private readonly onChange?: (state: GameState, result?: unknown) => void;
   private boardingPool: Passenger[];
+  private startingCashDrawer: Cash;
 
   constructor(
     initialState: GameState,
     onChange?: (state: GameState, result?: unknown) => void,
-    boardingPool: Passenger[] = [...defaultBoardingPool]
+    boardingPool: Passenger[] = [...defaultBoardingPool],
+    initialCash?: Cash
   ) {
     this.state = initialState;
     this.onChange = onChange;
     this.boardingPool = boardingPool;
+    this.startingCashDrawer = initialCash ? { ...initialCash } : { ...initialState.cash };
   }
 
   getState(): GameState {
@@ -731,7 +734,7 @@ export class GameController {
     let reconciliation: FinalReconciliation | undefined = undefined;
     if (advanceResult.isCompleted) {
       reconciliation = calculateFinalReconciliation(
-        startingCash,
+        this.startingCashDrawer,
         currentCash,
         advanceResult.updatedPassengers,
         roadsideExpenses,
@@ -766,7 +769,7 @@ export class GameController {
   getFinalReconciliation(): FinalReconciliation {
     if (this.state.reconciliation) return this.state.reconciliation;
     return calculateFinalReconciliation(
-      startingCash,
+      this.startingCashDrawer,
       this.state.cash,
       this.state.passengers,
       this.state.roadsideExpenses,
@@ -775,10 +778,17 @@ export class GameController {
     );
   }
 
-  restartJourney(customPassengers?: Passenger[]): void {
+  restartJourney(
+    customPassengers?: Passenger[],
+    customBoardingPool?: Passenger[],
+    customCash?: Cash
+  ): void {
     const list = customPassengers ?? defaultPassengers;
-    this.boardingPool = [...defaultBoardingPool];
-    this.state = createInitialGameState(list);
+    this.boardingPool = customBoardingPool ? [...customBoardingPool] : [...defaultBoardingPool];
+    if (customCash) {
+      this.startingCashDrawer = { ...customCash };
+    }
+    this.state = createInitialGameState(list, undefined, this.startingCashDrawer);
     this.onChange?.(this.state);
   }
 
@@ -787,7 +797,7 @@ export class GameController {
       this.state.journey,
       this.state.passengers,
       this.state.cash,
-      startingCash
+      this.startingCashDrawer
     );
   }
 

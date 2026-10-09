@@ -6,7 +6,8 @@
 .route-sign span { color: #90a2b8; margin: 0 .4rem; }
 .bus-scene { position: relative; min-height: min(62vw, 650px); overflow: hidden; border: 1px solid #31425b; border-radius: 22px; background: linear-gradient(160deg, #1f3854, #101d30 66%); box-shadow: 0 24px 70px #020711aa; }
 .bus-interior-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .28; }
-.bus-window { position: absolute; top: 8%; width: 30%; height: 38%; border: 10px solid #42546b; background: linear-gradient(180deg, #f0b46b 0%, #b85e47 48%, #273b56 49%, #15273e 100%); box-shadow: inset 0 0 30px #08132388; }
+.bus-window { position: absolute; top: 8%; width: 30%; height: 38%; border: 10px solid #42546b; background: linear-gradient(180deg, #f0b46b 0%, #b85e47 48%, #273b56 49%, #15273e 100%); box-shadow: inset 0 0 30px #08132388; overflow: hidden; }
+.window-billboard { position: absolute; bottom: 18%; left: 10%; width: 80%; height: auto; opacity: .88; filter: drop-shadow(0 4px 6px #0008); transform: perspective(400px) rotateY(-8deg); }
 .window-left { left: 7%; transform: skewY(3deg); }.window-right { right: 7%; transform: skewY(-3deg); }
 .bus-rail { position: absolute; top: 3%; width: 5px; height: 58%; background: #a7afae; box-shadow: 0 0 0 2px #33465b; }.rail-one { left: 39%; transform: rotate(5deg); }.rail-two { right: 39%; transform: rotate(-5deg); }
 .bus-ceiling-light { position: absolute; top: 4%; left: 43%; width: 14%; height: 12px; border-radius: 999px; background: #f6df9b; box-shadow: 0 0 32px 8px #f4c96c88; }
