@@ -661,6 +661,135 @@
   border-color: #64748b;
 }
 
+.share-button {
+  padding: 0.9rem 1.5rem;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-right: 0.75rem;
+  box-shadow: 0 4px 14px #10b98144;
+}
+
+.share-button:hover {
+  background: linear-gradient(135deg, #34d399, #10b981);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px #10b98166;
+}
+
+.share-toast {
+  margin: 1rem 0;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  background: #064e3b;
+  border: 1px solid #10b981;
+  color: #a7f3d0;
+  font-weight: 800;
+  font-size: 0.88rem;
+  text-align: center;
+  animation: toastPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes toastPop {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.formula-breakdown-box {
+  margin-bottom: 1.5rem;
+  border-radius: 10px;
+  background: #0a1422;
+  border: 1px solid #1e293b;
+  overflow: hidden;
+}
+
+.formula-summary {
+  padding: 0.85rem 1.15rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #38bdf8;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease;
+}
+
+.formula-summary:hover {
+  background: #112033;
+}
+
+.formula-content {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #1e293b;
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+}
+
+.formula-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #94a3b8;
+}
+
+.formula-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed #334155;
+  font-size: 0.95rem;
+}
+
+.seed-input-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.seed-text-input {
+  flex: 1;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background: #0a1422;
+  color: #f8f2df;
+  font-size: 0.82rem;
+  font-family: inherit;
+}
+
+.seed-random-btn {
+  padding: 0.45rem 0.85rem;
+  border: 1px solid #38bdf855;
+  border-radius: 6px;
+  background: #0f2742;
+  color: #38bdf8;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.seed-random-btn:hover {
+  background: #183b63;
+  color: #ffffff;
+}
+
+/* Tactile mobile tap physics */
+button:active,
+.passenger:active,
+.note-button:active,
+.tender-chip:active,
+.scenario-option:active {
+  transform: scale(0.97) !important;
+}
+
+
 .new-record-banner {
   display: inline-block;
   padding: 0.35rem 0.9rem;

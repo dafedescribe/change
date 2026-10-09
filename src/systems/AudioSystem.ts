@@ -65,26 +65,41 @@ export class AudioSystem {
     }
   }
 
+  /** Mobile tactile haptic vibration */
+  vibrate(pattern: number | number[]): void {
+    if (typeof window !== 'undefined' && 'navigator' in window && typeof window.navigator.vibrate === 'function') {
+      try {
+        window.navigator.vibrate(pattern);
+      } catch {
+        // Ignore haptics restriction
+      }
+    }
+  }
+
   /** Cash tender / note selection sound */
   playCash(): void {
+    this.vibrate(15);
     this.playTone(400, 0.08, 'triangle', 0.12);
     setTimeout(() => this.playTone(600, 0.08, 'triangle', 0.1), 40);
   }
 
   /** Successful change payment chime (sweet 2-tone) */
   playChime(): void {
+    this.vibrate([20, 30, 25]);
     this.playTone(523.25, 0.15, 'sine', 0.2); // C5
     setTimeout(() => this.playTone(659.25, 0.25, 'sine', 0.2), 120); // E5
   }
 
   /** Hold change obligation sound (soft ascending tone) */
   playHold(): void {
+    this.vibrate(25);
     this.playTone(329.63, 0.12, 'sine', 0.15); // E4
     setTimeout(() => this.playTone(440.0, 0.18, 'sine', 0.15), 90); // A4
   }
 
   /** Marry passengers sound (resonant triad) */
   playMarry(): void {
+    this.vibrate([30, 40, 30]);
     this.playTone(523.25, 0.2, 'triangle', 0.15);
     setTimeout(() => this.playTone(659.25, 0.2, 'triangle', 0.15), 80);
     setTimeout(() => this.playTone(783.99, 0.3, 'triangle', 0.18), 160);
@@ -92,6 +107,7 @@ export class AudioSystem {
 
   /** Break note sound (descending 3-tone split cascade) */
   playBreak(): void {
+    this.vibrate([15, 20, 15, 20, 15]);
     this.playTone(783.99, 0.1, 'square', 0.08);
     setTimeout(() => this.playTone(659.25, 0.1, 'square', 0.08), 70);
     setTimeout(() => this.playTone(523.25, 0.15, 'square', 0.08), 140);
@@ -99,17 +115,20 @@ export class AudioSystem {
 
   /** Invalid action buzzer / warning */
   playError(): void {
+    this.vibrate([60, 50, 60]);
     this.playTone(180, 0.18, 'sawtooth', 0.15);
   }
 
   /** Stop arrival / bus horn */
   playStopArrival(): void {
+    this.vibrate([40, 60, 40]);
     this.playTone(392.0, 0.12, 'sawtooth', 0.12);
     setTimeout(() => this.playTone(440.0, 0.2, 'sawtooth', 0.14), 100);
   }
 
   /** Route completion fanfare */
   playVictory(): void {
+    this.vibrate([30, 40, 30, 40, 50, 60, 80]);
     const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
     notes.forEach((freq, idx) => {
       setTimeout(() => this.playTone(freq, 0.25, 'triangle', 0.2), idx * 110);
@@ -118,6 +137,7 @@ export class AudioSystem {
 
   /** Subtle UI button click */
   playClick(): void {
+    this.vibrate(8);
     this.playTone(800, 0.04, 'sine', 0.05);
   }
 }

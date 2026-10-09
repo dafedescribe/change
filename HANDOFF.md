@@ -72,7 +72,7 @@ npm test -- --run
 npm run build
 ```
 
-The test suite contains **93 passing tests across 15 test files**, verifying the entire game architecture, transaction integrity, journey progression, danfo mechanics, roadside events, scenario generators, audio safety, persistence, and end-of-route reconciliation without requiring DOM or browser rendering:
+The test suite contains **94 passing tests across 15 test files**, verifying the entire game architecture, transaction integrity, journey progression, danfo mechanics, roadside events, scenario generators, audio safety, persistence, and end-of-route reconciliation without requiring DOM or browser rendering:
 
 - `src/tests/transaction_integrity.test.ts` (9 tests) — exact fare, overpayments, underpayments, cumulative partial payments, partial-to-full with change, drawer insufficiency, invalid denominations, duplicate execution prevention, alighted passenger protection.
 - `src/tests/danfo_mechanics.test.ts` (15 tests) — comprehensive testing of Hold, Marry, and Break actions including failure modes, invalid breakdown rejection, denomination availability, and alighted passenger checks.

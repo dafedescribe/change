@@ -27,7 +27,7 @@ CHANGE is a small danfo-conductor game prototype. The MVP starts with one bus in
 - **Mechanics**: 100% pure domain implementations of Fare, Cash, Transaction, Hold, Marry, Break, Journey, Roadside Events, and Scoring systems.
 - **Replayability & Persistence**: Predefined scenario catalog, deterministic procedural seed generator, and career high score persistence.
 - **UI & Presentation**: Main menu, bus interior with animated badges and window billboard, HUD quick controls, transaction panel, pause modal, how-to-play manual, and final reconciliation modal.
-- **Test Suite**: 93 tests across 15 test files with 100% DOM-free domain rule validation.
+- **Test Suite**: 94 tests across 15 test files with 100% DOM-free domain rule validation.
 
 ## Development
 

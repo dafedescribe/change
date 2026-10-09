@@ -32,4 +32,11 @@ describe('AudioSystem', () => {
       audio.playClick();
     }).not.toThrow();
   });
+
+  it('safely handles haptic vibration in non-browser or unsupported environments', () => {
+    expect(() => {
+      audio.vibrate(25);
+      audio.vibrate([20, 30, 25]);
+    }).not.toThrow();
+  });
 });

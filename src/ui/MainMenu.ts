@@ -49,6 +49,22 @@ export class MainMenu {
               `
                 )
                 .join('')}
+
+              <!-- Procedural custom seed option for puzzle masters & community challenges -->
+              <label class="scenario-option custom-seed-option ${options.selectedScenarioId.startsWith('seeded-') ? 'is-selected' : ''}">
+                <input type="radio" name="scenario" value="custom-seed" ${options.selectedScenarioId.startsWith('seeded-') ? 'checked' : ''} />
+                <div class="scenario-info">
+                  <div class="scenario-header">
+                    <strong>🎲 Custom Seed / Community Shift</strong>
+                    <span class="diff-badge diff-challenging">Endless</span>
+                  </div>
+                  <small>Play identical seed challenge or roll random shift</small>
+                  <div class="seed-input-row">
+                    <input type="text" class="seed-text-input" placeholder="e.g. oshodi-rush-99" value="lagos-shift-42" data-seed-input />
+                    <button type="button" class="seed-random-btn" data-random-seed title="Generate random seed">🎲 Random Seed</button>
+                  </div>
+                </div>
+              </label>
             </div>
 
             <div class="menu-primary-actions">
@@ -97,7 +113,7 @@ export class MainMenu {
                 📖 How to Play & Conductor Rules
               </button>
               <button type="button" class="menu-aux-btn" data-toggle-sound>
-                🔊 Sound: <strong class="sound-label">${options.soundEnabled ? 'ON' : 'OFF'}</strong>
+                🔊 Sound & Haptics: <strong class="sound-label">${options.soundEnabled ? 'ON' : 'OFF'}</strong>
               </button>
             </div>
 
@@ -118,11 +134,36 @@ export class MainMenu {
       });
     });
 
+    // Random seed button
+    const seedInput = root.querySelector<HTMLInputElement>('[data-seed-input]');
+    root.querySelector('[data-random-seed]')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const randomSeedNum = Math.floor(Math.random() * 90000) + 10000;
+      if (seedInput) {
+        seedInput.value = `lagos-shift-${randomSeedNum}`;
+      }
+      const customRadio = root.querySelector<HTMLInputElement>('input[value="custom-seed"]');
+      if (customRadio) {
+        customRadio.checked = true;
+        root.querySelectorAll('.scenario-option').forEach((el) => el.classList.remove('is-selected'));
+        customRadio.closest('.scenario-option')?.classList.add('is-selected');
+      }
+    });
+
     // Start button
     root.querySelector('[data-start-game]')?.addEventListener('click', () => {
       const selectedRadio = root.querySelector<HTMLInputElement>('input[name="scenario"]:checked');
-      const scenarioId = selectedRadio ? selectedRadio.value : options.selectedScenarioId;
-      const scenario = scenarioSystem.getScenarioById(scenarioId);
+      const val = selectedRadio ? selectedRadio.value : options.selectedScenarioId;
+
+      if (val === 'custom-seed') {
+        const seedVal = seedInput?.value?.trim() || 'lagos-seed-1';
+        const scenario = scenarioSystem.generateScenarioFromSeed(seedVal);
+        options.onStartGame(scenario);
+        return;
+      }
+
+      const scenario = scenarioSystem.getScenarioById(val);
       options.onStartGame(scenario);
     });
 

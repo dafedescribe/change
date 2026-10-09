@@ -65,7 +65,9 @@ export function renderPassenger(
 
   button.innerHTML = `
     <img class="passenger-art" src="${passenger.appearance?.sprite ?? assets.passengerDefault}" alt="" aria-hidden="true" />
-    <span class="passenger-head" style="--accent: ${accentColor}"></span>
+    <span class="passenger-head" style="--accent: ${accentColor}">
+      <span class="character-prop prop-${passenger.id}"></span>
+    </span>
     <span class="passenger-body" style="--accent: ${accentColor}"></span>
     <span class="passenger-card">
       <div class="passenger-header">

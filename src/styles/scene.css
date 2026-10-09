@@ -44,3 +44,23 @@
 .status-dropped { background: #1e293b; color: #64748b; }
 .passenger-card strong { display: block; font-size: 0.95rem; }
 .passenger-card small { display: block; margin-top: .15rem; color: #aab8c8; font-size: .7rem; }
+
+/* Authentic Character Props */
+.character-prop { position: absolute; pointer-events: none; }
+/* Sade: Nigerian Gele (headwrap) */
+.prop-sade { top: -14px; left: -10px; right: -10px; height: 26px; border-radius: 40% 40% 10% 10%; background: linear-gradient(135deg, #a855f7, #6b21a8); box-shadow: 0 -3px 0 #4c1d95, inset 0 2px 0 #d8b4fe; transform: rotate(-3deg); }
+/* Tunde: Over-ear Headphones */
+.prop-tunde { top: -6px; left: -6px; right: -6px; height: 16px; border-top: 4px solid #1e293b; border-radius: 50% 50% 0 0; }
+.prop-tunde::before, .prop-tunde::after { content: ''; position: absolute; top: 8px; width: 8px; height: 16px; border-radius: 4px; background: #0f172a; box-shadow: inset 0 0 0 1px #38bdf8; }
+.prop-tunde::before { left: -2px; }
+.prop-tunde::after { right: -2px; }
+/* Babatunde: Street Cap / Fila */
+.prop-babatunde { top: -10px; left: 0; right: 0; height: 16px; border-radius: 50% 50% 20% 20%; background: #eab308; box-shadow: inset 0 -3px 0 #a16207; }
+/* Amarachi: Smart Spectacles */
+.prop-amarachi { top: 10px; left: 6px; right: 6px; height: 8px; border-top: 2px solid #38bdf8; }
+.prop-amarachi::before, .prop-amarachi::after { content: ''; position: absolute; top: 0; width: 10px; height: 8px; border: 2px solid #38bdf8; border-radius: 3px; background: rgba(56, 189, 248, 0.2); }
+.prop-amarachi::before { left: 0; }
+.prop-amarachi::after { right: 0; }
+/* Folake: Pink Hair Beads */
+.prop-folake { top: -8px; left: -2px; right: -2px; height: 14px; border-radius: 50%; background: #f43f5e; box-shadow: -4px 4px 0 #fb7185, 4px 4px 0 #fb7185; }
+
