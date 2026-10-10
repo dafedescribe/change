@@ -264,5 +264,9 @@ function renderGame(state: ReturnType<GameController['getState']>): void {
 
 // Initial bootstrap
 if (app) {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('view') === 'game') {
+    currentView = 'playing';
+  }
   renderApp();
 }
