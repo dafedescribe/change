@@ -25,6 +25,8 @@ export type FinalReconciliation = {
   passengersDelivered: number;
   totalPassengers: number;
   marriagesPerformed: number;
+  debtorsCount?: number;
+  unreturnedChangeCount?: number;
   score: number;
   rank: ConductorRank;
   stars: number;
@@ -73,7 +75,12 @@ export function calculateFinalReconciliation(
   const totalPenalties = unpaidDebtPenalty + unreturnedChangePenalty;
   const finalProfit = netGain - totalPenalties;
 
-  const delivered = allPassengers.filter((p) => p.status === 'dropped-off').length;
+  const delivered = allPassengers.filter(
+    (p) => p.status === 'dropped-off' && p.reachedDestination !== false
+  ).length;
+  const strandedPassengers = allPassengers.filter(
+    (p) => p.status === 'dropped-off' && p.reachedDestination === false
+  );
   const totalPassengers = allPassengers.length;
 
   // Score calculation:
@@ -115,6 +122,9 @@ export function calculateFinalReconciliation(
     notes.push('Too much commotion at the bus stops. Needs more street experience!');
   }
 
+  if (strandedPassengers.length > 0) {
+    notes.push(`${strandedPassengers.length} passenger(s) alighted without reaching their destination!`);
+  }
   if (marriagesCount > 0) {
     notes.push(`Performed ${marriagesCount} passenger marriage(s) to conserve small change.`);
   }
@@ -141,6 +151,8 @@ export function calculateFinalReconciliation(
     passengersDelivered: delivered,
     totalPassengers,
     marriagesPerformed: marriagesCount,
+    debtorsCount: alightedWithDebt.length,
+    unreturnedChangeCount: alightedWithoutChange.length,
     score,
     rank,
     stars,

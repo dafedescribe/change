@@ -19,11 +19,18 @@ describe('fare system (pure domain logic without DOM)', () => {
     expect(() => getFareForPassenger(passengers, 'unknown')).toThrow('Passenger not found');
   });
 
-  it('calculates fares for destinations', () => {
+  it('calculates fares for destinations and origin pairs', () => {
     expect(calculateFare('Ojuelegba')).toBe(500);
     expect(calculateFare('Yaba')).toBe(300);
     expect(calculateFare('Ketu')).toBe(700);
     expect(calculateFare('UnknownDestination')).toBe(400); // fallback
+
+    // Origin-aware route fares
+    expect(calculateFare('Ojuelegba', 'Oshodi')).toBe(500);
+    expect(calculateFare('Ojuelegba', 'Yaba')).toBe(200);
+    expect(calculateFare('Ketu', 'Yaba')).toBe(400);
+    expect(calculateFare('Ketu', 'Ojuelegba')).toBe(300);
+    expect(calculateFare('Ketu', 'UnknownOrigin')).toBe(700); // falls back to destination fare
   });
 
   it('calculates outstanding balances accurately', () => {

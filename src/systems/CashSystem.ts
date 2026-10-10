@@ -156,36 +156,71 @@ export type ChangeBreakdownResult = {
 /**
  * Determines whether exact change can be dispensed given available cash denominations,
  * returning the list of notes to dispense.
+ * Uses an optimal backtracking algorithm that tests denominations in descending order
+ * but backtracks if larger notes leave a remainder that cannot be satisfied with smaller notes.
  */
 export function calculateChangeBreakdown(changeDue: number, availableCash: Cash): ChangeBreakdownResult {
   if (changeDue <= 0) {
     return { possible: true, denominations: [], shortfall: 0 };
   }
 
-  let remaining = changeDue;
-  const changeNotes: number[] = [];
-  const tempCash: Record<number, number> = { ...availableCash };
-
-  // Greedy approach using descending standard denominations
+  // Flatten available notes into a descending array
+  const availableNotes: number[] = [];
   for (const denom of DENOMINATIONS) {
-    while (remaining >= denom && (tempCash[denom] ?? 0) > 0) {
-      changeNotes.push(denom);
-      remaining -= denom;
-      tempCash[denom] = (tempCash[denom] ?? 0) - 1;
+    const count = Math.max(0, availableCash[denom] ?? 0);
+    for (let i = 0; i < count; i++) {
+      availableNotes.push(denom);
     }
   }
 
-  if (remaining === 0) {
+  let bestSolution: number[] | null = null;
+  let bestShortfall = changeDue;
+  let bestShortfallNotes: number[] = [];
+
+  function search(index: number, remaining: number, currentCombo: number[]): boolean {
+    if (remaining === 0) {
+      bestSolution = [...currentCombo];
+      return true;
+    }
+    if (remaining < bestShortfall) {
+      bestShortfall = remaining;
+      bestShortfallNotes = [...currentCombo];
+    }
+    if (index >= availableNotes.length || remaining < 0) {
+      return false;
+    }
+
+    for (let i = index; i < availableNotes.length; i++) {
+      // Deduplicate identical denominations at the same recursion depth
+      if (i > index && availableNotes[i] === availableNotes[i - 1]) {
+        continue;
+      }
+      const note = availableNotes[i];
+      if (note <= remaining) {
+        currentCombo.push(note);
+        if (search(i + 1, remaining - note, currentCombo)) {
+          return true;
+        }
+        currentCombo.pop();
+      }
+    }
+    return false;
+  }
+
+  const foundExact = search(0, changeDue, []);
+
+  if (foundExact && bestSolution !== null) {
     return {
       possible: true,
-      denominations: changeNotes,
+      denominations: bestSolution,
       shortfall: 0,
     };
   }
 
   return {
     possible: false,
-    denominations: changeNotes,
-    shortfall: remaining,
+    denominations: bestShortfallNotes,
+    shortfall: bestShortfall,
   };
 }
+

@@ -15,6 +15,7 @@ import {
   completeTransaction,
   manageIncompleteTransaction,
   executeConductorTransaction,
+  isValidDenomination,
   type TransactionResult,
   type ConductorTransactionResult,
 } from '../systems/TransactionSystem';
@@ -201,6 +202,28 @@ export class GameController {
 
     const remainingDue = calculateOutstandingBalance(passenger.fare, passenger.paidAmount ?? 0);
     const tenderedTotal = tenderedNotes.reduce((sum, n) => sum + n, 0);
+
+    if (tenderedNotes.some((n) => !isValidDenomination(n) || n <= 0)) {
+      const updatedTransaction: ActiveTransaction = {
+        ...active,
+        fareDue: passenger.fare,
+        outstandingBalance: remainingDue,
+        tenderedNotes: [...tenderedNotes],
+        tenderedTotal,
+        requiredChange: 0,
+        changeDue: 0,
+        status: 'under',
+        validationMessage: 'Invalid banknote denomination tendered by passenger.',
+      };
+      this.state = {
+        ...this.state,
+        activeTransaction: updatedTransaction,
+        message: 'Invalid banknote denomination tendered by passenger.',
+      };
+      this.onChange?.(this.state);
+      return;
+    }
+
     const requiredChange = Math.max(0, tenderedTotal - remainingDue);
     const isUnderpaid = tenderedTotal < remainingDue;
 

@@ -114,7 +114,8 @@ export function advanceJourney(
   const updatedPassengers = passengers.map((p) => {
     if ((p.destination === newStop || isCompleted) && p.status !== 'dropped-off') {
       droppedOffIds.add(p.id);
-      const dropped: Passenger = { ...p, status: 'dropped-off' };
+      const reachedDestination = p.destination === newStop;
+      const dropped: Passenger = { ...p, status: 'dropped-off', reachedDestination };
       droppedOff.push(dropped);
       return dropped;
     }
@@ -152,7 +153,9 @@ export function calculateJourneyProgress(
   journey: JourneyState,
   passengers: Passenger[]
 ): JourneyProgress {
-  const passengersDelivered = passengers.filter((p) => p.status === 'dropped-off').length;
+  const passengersDelivered = passengers.filter(
+    (p) => p.status === 'dropped-off' && p.reachedDestination !== false
+  ).length;
   const totalFaresCollected = getTotalCollectedFare(passengers);
   const totalOutstandingDebt = getTotalOutstandingBalance(passengers);
 
@@ -176,7 +179,9 @@ export function calculateJourneySummary(
   finalCash: Cash,
   startingCash?: Cash
 ): JourneySummary {
-  const delivered = passengers.filter((p) => p.status === 'dropped-off');
+  const delivered = passengers.filter(
+    (p) => p.status === 'dropped-off' && p.reachedDestination !== false
+  );
   const fullyPaid = passengers.filter((p) => p.paymentStatus === 'paid');
   const withDebt = passengers.filter((p) => (p.outstandingBalance ?? 0) > 0);
 

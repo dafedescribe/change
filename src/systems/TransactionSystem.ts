@@ -1,6 +1,7 @@
 import type { Passenger } from '../data/passengers';
 import type { Cash } from '../game/GameState';
 import {
+  DENOMINATIONS,
   calculateChange,
   receiveDenominations,
   calculateChangeBreakdown,
@@ -10,6 +11,12 @@ import {
   type ChangeValidationResult,
 } from './CashSystem';
 import { calculateOutstandingBalance } from './FareSystem';
+
+export const VALID_DENOMINATIONS: readonly number[] = DENOMINATIONS;
+
+export function isValidDenomination(value: number): boolean {
+  return VALID_DENOMINATIONS.includes(value);
+}
 
 export type TransactionStatus = 'exact' | 'overpayment' | 'underpayment' | 'partial';
 
@@ -46,8 +53,18 @@ export type ConductorTransactionResult = {
  * Standard completeTransaction matching existing tests and interface.
  * Full payments (exact or overpayment) are accepted.
  * Underpayments are rejected with 'Payment is below the fare'.
+ * Invalid denominations are rejected.
  */
 export function completeTransaction(fare: number, selected: number[], previouslyPaid = 0): TransactionResult {
+  if (selected.some((n) => !isValidDenomination(n) || n <= 0)) {
+    return {
+      totalPaid: 0,
+      change: 0,
+      accepted: false,
+      reason: 'Invalid banknote denomination tendered',
+    };
+  }
+
   const selectedTotal = selected.reduce((total, denomination) => total + denomination, 0);
   const effectiveDue = Math.max(0, fare - previouslyPaid);
 
@@ -72,9 +89,22 @@ export function completeTransaction(fare: number, selected: number[], previously
  * Validates a payment against the due fare with full diagnostic details.
  */
 export function validatePayment(fare: number, selected: number[], previouslyPaid = 0): TransactionResult {
+  const remainingDue = calculateOutstandingBalance(fare, previouslyPaid);
+
+  if (selected.some((n) => !isValidDenomination(n) || n <= 0)) {
+    return {
+      totalPaid: previouslyPaid,
+      change: 0,
+      accepted: false,
+      reason: 'Invalid banknote denomination tendered',
+      outstanding: remainingDue,
+      status: 'underpayment',
+      isPartial: false,
+    };
+  }
+
   const selectedTotal = selected.reduce((total, denomination) => total + denomination, 0);
   const totalPaid = previouslyPaid + selectedTotal;
-  const remainingDue = calculateOutstandingBalance(fare, previouslyPaid);
 
   if (selectedTotal === 0) {
     return {
@@ -122,6 +152,18 @@ export function manageIncompleteTransaction(
   selected: number[],
   previouslyPaid = 0
 ): TransactionResult {
+  if (selected.some((n) => !isValidDenomination(n) || n <= 0)) {
+    return {
+      totalPaid: 0,
+      change: 0,
+      accepted: false,
+      reason: 'Invalid banknote denomination tendered',
+      outstanding: Math.max(0, fare - previouslyPaid),
+      status: 'underpayment',
+      isPartial: false,
+    };
+  }
+
   const selectedTotal = selected.reduce((total, denomination) => total + denomination, 0);
   if (selectedTotal <= 0) {
     return {
@@ -136,6 +178,7 @@ export function manageIncompleteTransaction(
   }
 
   const effectiveDue = Math.max(0, fare - previouslyPaid);
+
 
   if (selectedTotal >= effectiveDue) {
     const change = calculateChange(selectedTotal, effectiveDue);
@@ -257,6 +300,33 @@ export function executeConductorTransaction(
       selectedChangeTotal: 0,
       changeValidation: validation,
       message: `${passenger.name} has already paid the ₦${fare} fare in full.`,
+    };
+  }
+
+  if (tenderedNotes.length === 0) {
+
+    const validation = validateSelectedChange(0, [], cash);
+    return {
+      accepted: false,
+      fare,
+      amountPaid: 0,
+      requiredChange: 0,
+      selectedChangeTotal: 0,
+      changeValidation: validation,
+      message: 'No banknotes tendered for payment.',
+    };
+  }
+
+  if (tenderedNotes.some((n) => !isValidDenomination(n) || n <= 0)) {
+    const validation = validateSelectedChange(0, [], cash);
+    return {
+      accepted: false,
+      fare,
+      amountPaid: 0,
+      requiredChange: 0,
+      selectedChangeTotal: 0,
+      changeValidation: validation,
+      message: 'Invalid banknote denomination tendered by passenger.',
     };
   }
 

@@ -96,4 +96,15 @@ describe('cash system (pure domain logic without DOM)', () => {
     expect(zeroResult.possible).toBe(true);
     expect(zeroResult.denominations).toEqual([]);
   });
+
+  it('solves change breakdown when greedy choice fails (regression test for non-canonical finite inventory)', () => {
+    // Greedy would pick 500, then get stuck on 100 because there are no 100s.
+    // Optimal algorithm must backtrack and find [200, 200, 200] = 600.
+    const nonGreedyDrawer = { 1000: 0, 500: 1, 200: 3, 100: 0 };
+    const result = calculateChangeBreakdown(600, nonGreedyDrawer);
+    expect(result.possible).toBe(true);
+    expect(result.denominations).toEqual([200, 200, 200]);
+    expect(result.shortfall).toBe(0);
+  });
 });
+

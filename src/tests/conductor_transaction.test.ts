@@ -146,4 +146,26 @@ describe('complete transaction workflow (8-step conductor interaction)', () => {
     expect(result?.message).toContain('Incomplete payment tendered: ₦200 is below the ₦500 fare');
     expect(controller.getState().passengers[0].status).toBe('waiting');
   });
+
+  it('rejects invalid or non-existent banknote denominations tendered by passenger', () => {
+    const controller = new GameController(createInitialGameState(passengers));
+    controller.selectPassenger('tunde');
+
+    // Tendering invalid non-standard note (e.g. ₦350 note or negative)
+    controller.acceptAmountPaid([350]);
+    expect(controller.getState().activeTransaction?.validationMessage).toContain(
+      'Invalid banknote denomination tendered by passenger.'
+    );
+
+    const result = controller.giveChangeAndComplete();
+    expect(result?.accepted).toBe(false);
+    expect(result?.message).toContain('Invalid banknote denomination tendered by passenger.');
+    expect(controller.getState().passengers[0].status).toBe('waiting');
+
+    // Tendering empty notes array
+    controller.acceptAmountPaid([]);
+    const emptyResult = controller.giveChangeAndComplete();
+    expect(emptyResult?.accepted).toBe(false);
+    expect(emptyResult?.message).toContain('No banknotes tendered for payment.');
+  });
 });

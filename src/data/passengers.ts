@@ -25,6 +25,7 @@ export type Passenger = {
   changeHeld?: boolean;
   heldChangeAmount?: number;
   marriedTo?: string;
+  reachedDestination?: boolean;
 };
 
 export const passengers: Passenger[] = [

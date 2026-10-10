@@ -1,5 +1,5 @@
 import type { Passenger } from '../data/passengers';
-import { faresByDestination, type Destination } from '../data/fares';
+import { faresByDestination, routeFares, type Destination } from '../data/fares';
 
 /**
  * Pure fare calculation system: calculates fares and balances
@@ -12,7 +12,10 @@ export function getFareForPassenger(passengerList: Passenger[], passengerId: str
   return passenger.fare;
 }
 
-export function calculateFare(destination: string, _origin?: string): number {
+export function calculateFare(destination: string, origin?: string): number {
+  if (origin && routeFares[origin] && routeFares[origin][destination] !== undefined) {
+    return routeFares[origin][destination];
+  }
   if (destination in faresByDestination) {
     return faresByDestination[destination as keyof typeof faresByDestination];
   }

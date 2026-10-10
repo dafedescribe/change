@@ -105,4 +105,48 @@ describe('journey system (pure domain logic without DOM)', () => {
     expect(summary.startingCashOnHand).toBe(3000);
     expect(summary.netCashGain).toBe(1800);
   });
+
+  it('correctly flags reachedDestination and distinguishes over-carried terminal drop-offs', () => {
+    // Passenger whose destination is Yaba, but remains on bus until Ketu (terminal)
+    const customPassenger = {
+      ...passengers[0],
+      id: 'stranded-guy',
+      destination: 'Yaba' as const,
+      status: 'waiting' as const,
+    };
+
+    const journey = createJourney();
+    // Move Oshodi -> Yaba -> Ojuelegba -> Ketu with only this passenger
+    const step1 = advanceJourney(journey, [customPassenger]); // At Yaba: destination matches, drops off with reachedDestination: true
+    expect(step1.droppedOff[0]?.reachedDestination).toBe(true);
+
+    // Now test a passenger who does NOT get dropped off at Yaba (e.g. status was already in transit or missed stop)
+    // and only drops off at final stop Ketu
+    const unalightedPassenger = {
+      ...passengers[0],
+      id: 'missed-stop-guy',
+      destination: 'Yaba' as const,
+      status: 'waiting' as const,
+    };
+    const terminalJourney = {
+      route: 'Oshodi → Ketu',
+      stops: ['Oshodi', 'Ketu'],
+      currentStopIndex: 0,
+      currentStop: 'Oshodi',
+      totalStops: 2,
+      isCompleted: false,
+    };
+    const terminalStep = advanceJourney(terminalJourney, [unalightedPassenger]);
+    expect(terminalStep.isCompleted).toBe(true);
+    expect(terminalStep.droppedOff.length).toBe(1);
+    expect(terminalStep.droppedOff[0]?.reachedDestination).toBe(false);
+
+    // Summary should report 0 delivered
+    const summary = calculateJourneySummary(
+      terminalStep.nextJourney,
+      terminalStep.updatedPassengers,
+      { 100: 0, 200: 0, 500: 0, 1000: 0 }
+    );
+    expect(summary.passengersDelivered).toBe(0);
+  });
 });

@@ -113,4 +113,28 @@ describe('transaction system (pure domain logic without DOM)', () => {
     expect(execution.updatedPassenger.status).toBe('waiting');
     expect(execution.updatedCash[200]).toBe(6);
   });
+
+  it('rejects invalid note denominations across all transaction operations', () => {
+    // completeTransaction
+    const invalidComplete = completeTransaction(500, [350]);
+    expect(invalidComplete.accepted).toBe(false);
+    expect(invalidComplete.reason).toContain('Invalid banknote denomination tendered');
+
+    // validatePayment
+    const invalidValidate = validatePayment(500, [75]);
+    expect(invalidValidate.accepted).toBe(false);
+    expect(invalidValidate.reason).toContain('Invalid banknote denomination tendered');
+
+    // manageIncompleteTransaction
+    const invalidIncomplete = manageIncompleteTransaction(500, [-50]);
+    expect(invalidIncomplete.accepted).toBe(false);
+    expect(invalidIncomplete.reason).toContain('Invalid banknote denomination tendered');
+
+    // processPassengerPayment
+    const cash = { 100: 5, 200: 5, 500: 2, 1000: 1 };
+    const invalidProcess = processPassengerPayment(dummyPassenger, [42], cash);
+    expect(invalidProcess.result.accepted).toBe(false);
+    expect(invalidProcess.result.reason).toContain('Invalid banknote denomination tendered');
+    expect(invalidProcess.updatedCash).toEqual(cash); // drawer untouched
+  });
 });

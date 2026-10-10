@@ -63,7 +63,7 @@ export class ResultsPanel {
           <div class="recon-card">
             <span class="recon-label">Roadside Expenses</span>
             <strong class="stat-expense">-${formatNaira(reconciliation.totalRoadsideLeviesPaid)}</strong>
-            <small>Owo Agbero & park levies</small>
+            <small>Agbero & park levies (paid from drawer cash)</small>
           </div>
 
           <div class="recon-card">
@@ -77,7 +77,7 @@ export class ResultsPanel {
           <div class="recon-card recon-highlight">
             <span class="recon-label">Final Drawer Cash</span>
             <strong>${formatNaira(reconciliation.finalCash)}</strong>
-            <small>Net gain: ${reconciliation.netCashGain >= 0 ? '+' : ''}${formatNaira(reconciliation.netCashGain)}</small>
+            <small>Net cash gain: ${reconciliation.netCashGain >= 0 ? '+' : ''}${formatNaira(reconciliation.netCashGain)}</small>
           </div>
 
           <div class="recon-card recon-highlight">
@@ -85,7 +85,7 @@ export class ResultsPanel {
             <strong class="${reconciliation.finalProfit >= 0 ? 'stat-paid' : 'stat-debt'}">
               ${formatNaira(reconciliation.finalProfit)}
             </strong>
-            <small>After all fines & levies</small>
+            <small>Net cash gain minus penalties</small>
           </div>
         </div>
 
@@ -97,33 +97,45 @@ export class ResultsPanel {
             </summary>
             <div class="formula-content">
               <div class="formula-row">
-                <span>Pass Delivered Bonus:</span>
-                <strong class="stat-paid">+${reconciliation.passengersDelivered * 20} pts</strong>
+                <span>Base Shift Completion:</span>
+                <strong class="stat-paid">+300 pts</strong>
               </div>
               <div class="formula-row">
-                <span>Fares Collected:</span>
-                <strong class="stat-paid">+${Math.min(30, Math.floor(reconciliation.totalFaresCollected / 30))} pts</strong>
+                <span>Passengers Delivered (+100 ea):</span>
+                <strong class="stat-paid">+${reconciliation.passengersDelivered * 100} pts</strong>
               </div>
               <div class="formula-row">
-                <span>Street Marriages Bonus:</span>
-                <strong class="stat-paid">+${reconciliation.marriagesPerformed * 25} pts</strong>
+                <span>Net Profit Contribution (1 pt / ₦10):</span>
+                <strong class="${reconciliation.finalProfit >= 0 ? 'stat-paid' : 'stat-debt'}">
+                  ${Math.floor(reconciliation.finalProfit / 10) >= 0 ? '+' : ''}${Math.floor(reconciliation.finalProfit / 10)} pts
+                </strong>
               </div>
               ${
-                reconciliation.unpaidDebtPenalty > 0
+                reconciliation.marriagesPerformed > 0
                   ? `
                 <div class="formula-row">
-                  <span>Uncollected Passenger Debt:</span>
-                  <strong class="stat-debt">-${reconciliation.unpaidDebtPenalty} pts</strong>
+                  <span>Street Marriages (+150 ea):</span>
+                  <strong class="stat-paid">+${reconciliation.marriagesPerformed * 150} pts</strong>
                 </div>
               `
                   : ''
               }
               ${
-                reconciliation.unreturnedChangePenalty > 0
+                (reconciliation.debtorsCount ?? 0) > 0
                   ? `
                 <div class="formula-row">
-                  <span>Unreturned Held Change (2x fine):</span>
-                  <strong class="stat-debt">-${reconciliation.unreturnedChangePenalty} pts</strong>
+                  <span>Unpaid Debt Fine (-100 ea):</span>
+                  <strong class="stat-debt">-${(reconciliation.debtorsCount ?? 0) * 100} pts</strong>
+                </div>
+              `
+                  : ''
+              }
+              ${
+                (reconciliation.unreturnedChangeCount ?? 0) > 0
+                  ? `
+                <div class="formula-row">
+                  <span>Unreturned Change Fine (-150 ea):</span>
+                  <strong class="stat-debt">-${(reconciliation.unreturnedChangeCount ?? 0) * 150} pts</strong>
                 </div>
               `
                   : ''
